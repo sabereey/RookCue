@@ -1,0 +1,6 @@
+{
+  "version": "24.12.0",
+  "source": "https://raw.githubusercontent.com/nodejs/node/v24.12.0/LICENSE",
+  "sha256": "537308465103a306d0e3eecf42632b4ff1b48aaaec044e9fc10a78c81fd00b34",
+  "description": "Unmodified complete upstream Node.js LICENSE, including bundled runtime component notices. Native releases must use exactly Node 24.12.0."
+}

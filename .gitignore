@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.growth-memory/
+/release/
+*.tmp
+work/
+.superpowers/
+
+.DS_Store
+._*

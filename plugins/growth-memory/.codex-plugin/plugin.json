@@ -1,0 +1,33 @@
+{
+  "name": "growth-memory",
+  "version": "0.1.0-beta.8",
+  "description": "A local-first Codex plugin that helps agents use growth-memory for task recovery, review, and personal knowledge promotion.",
+  "author": {
+    "name": "Growth Memory"
+  },
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "codex",
+    "memory",
+    "review",
+    "knowledge",
+    "agent"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RookCue",
+    "shortDescription": "Turn AI-assisted work into recoverable project memory and reviewed personal knowledge.",
+    "longDescription": "Growth Memory teaches Codex to use the local growth-memory CLI as a background protocol for non-trivial coding work. It records task progress, recommends lightweight reviews, and promotes personal knowledge only after human approval.",
+    "developerName": "RookCue",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use growth-memory for this coding task.",
+      "Show my promoted personal knowledge.",
+      "Recommend a lightweight review for this task."
+    ]
+  }
+}
