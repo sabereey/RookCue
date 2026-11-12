@@ -68,6 +68,10 @@ it("assembles inspectable exact-commit source and checksums for every delivered 
   const base = join(extracted, "gmem-0.1.0-beta.6-darwin-arm64");
   const listing = execFileSync("tar", ["-tzf", archive], { encoding: "utf8" }).trim().split("\n").filter(p => !p.endsWith("/")).map(p => p.split("/").at(-1)).sort();
   expect(listing).toEqual(["INSTALL.md", "LICENSE", "NODE-LICENSE.txt", "NOTICE", "SHA256SUMS", "SOURCE.md", "THIRD_PARTY_NOTICES.md", "gmem-darwin-arm64", "provenance.json", "source.tar.gz"].sort());
+  const installGuide = await readFile(join(base, "INSTALL.md"), "utf8");
+  expect(installGuide).toContain("install -m 755 gmem-darwin-arm64 ~/.local/bin/rookcue");
+  expect(installGuide).toContain("ln -sfn rookcue ~/.local/bin/gmem");
+  expect(installGuide).toContain("ln -sfn rookcue ~/.local/bin/growth-memory");
   const lines = (await readFile(join(base, "SHA256SUMS"), "utf8")).trim().split("\n"); expect(lines).toHaveLength(9);
   for (const line of lines) { const [hash, file] = line.split("  "); expect(digest(await readFile(join(base, file!)))).toBe(hash); }
   const source = join(base, "source.tar.gz"); const sourceListing = execFileSync("tar", ["-tzf", source], { encoding: "utf8" });

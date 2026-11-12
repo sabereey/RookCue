@@ -11,13 +11,14 @@ For current priorities and future milestones, see the [roadmap](docs/roadmap.md)
 
 The core and included Codex integration are available under [GPL-3.0-only](LICENSE).
 This is an early source release. Use the source installation below to try the
-CLI and Codex integration. The CLI exposes both `gmem` and `growth-memory`.
+CLI and Codex integration. The CLI provides `rookcue`, the short command `gmem`, and the compatibility alias
+`growth-memory`.
 
 ## Codex Plugin
 
 This repository includes a local Codex plugin source at `plugins/growth-memory/`.
 
-The plugin is the agent-native experience layer for `growth-memory`: it teaches Codex when to record task state, how to recommend lightweight reviews, and how to promote personal knowledge only after human approval.
+The plugin is the agent-native experience layer for `rookcue`: it teaches Codex when to record task state, how to recommend lightweight reviews, and how to promote personal knowledge only after human approval.
 
 The plugin does not replace CLI installation. Build and link the CLI first:
 
@@ -46,19 +47,18 @@ npm run build
 npm link
 ```
 
-The linked command is `growth-memory`.
-
-The official short command is `gmem`. Both commands point to the same CLI:
+The main command is `rookcue`. The short command `gmem` and compatibility alias
+`growth-memory` point to the same CLI:
 
 ```bash
-growth-memory --help
+rookcue --help
 gmem --help
+growth-memory --help
 ```
 
-Use `growth-memory` in formal documentation and scripts where clarity matters.
-Use `gmem` for day-to-day interactive work. If your machine has no existing
-`gm` command, you can create a personal shell alias such as `alias gm=gmem`;
-`gm` is not installed by this package to avoid command-name conflicts.
+Examples use `rookcue`. Use `gmem` for shorter interactive commands.
+Existing scripts can continue to use `growth-memory`. Run `npm link` again after
+updating an existing source installation to register the new `rookcue` command.
 
 ## Roots and assets
 
@@ -111,7 +111,7 @@ This is the contract to use for agent integrations.
 Check whether the project and personal roots are usable:
 
 ```bash
-growth-memory status --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
+rookcue status --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
 ```
 
 The same command can be written with the short alias:
@@ -123,13 +123,13 @@ gmem status --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
 List promoted personal knowledge:
 
 ```bash
-growth-memory knowledge list --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
+rookcue knowledge list --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
 ```
 
 Show one promoted concept in a human-readable form:
 
 ```bash
-growth-memory knowledge show \
+rookcue knowledge show \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --concept "$CONCEPT_ID"
@@ -141,7 +141,7 @@ boundary, confidence, local promoted time, and a short source label. Use
 on-demand provenance when you need the full source chain:
 
 ```bash
-growth-memory knowledge provenance \
+rookcue knowledge provenance \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --concept "$CONCEPT_ID"
@@ -150,12 +150,12 @@ growth-memory knowledge provenance \
 Personal Pro Foundation local commands:
 
 ```bash
-growth-memory personal export --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --out "$OUT_DIR"
-growth-memory personal verify --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --bundle "$EXPORT_ROOT"
-growth-memory personal import --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --bundle "$EXPORT_ROOT" --dry-run
-growth-memory knowledge search --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --query "provenance"
-growth-memory knowledge timeline --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
-growth-memory knowledge digest --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
+rookcue personal export --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --out "$OUT_DIR"
+rookcue personal verify --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --bundle "$EXPORT_ROOT"
+rookcue personal import --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --bundle "$EXPORT_ROOT" --dry-run
+rookcue knowledge search --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --query "provenance"
+rookcue knowledge timeline --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
+rookcue knowledge digest --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
 ```
 
 `personal verify` recalculates manifest SHA-256 digests and reports missing,
@@ -166,13 +166,13 @@ files would be added or skipped; it does not overwrite data in this phase.
 `knowledge digest` gives a deterministic local summary of recent knowledge,
 recurring themes, and oldest concepts.
 
-`gmem peer` syncs personal knowledge directly between paired devices on the same
+`rookcue peer` syncs personal knowledge directly between paired devices on the same
 LAN. Each sync is manually triggered. See the [LAN guide](docs/lan-direct-sync.md)
 for pairing, preview, conflicts and recovery.
 
 ## Review recommendations
 
-`growth-memory review recommend --signal <signal...>` is deterministic. The current signals and weights are:
+`rookcue review recommend --signal <signal...>` is deterministic. The current signals and weights are:
 
 | Signal | Weight |
 | --- | ---: |
@@ -231,7 +231,7 @@ Project and personal mutations use per-root cross-process locks. Task/current/ev
 
 ## Help-verified command surface
 
-These are the top-level command groups shown by `growth-memory --help`:
+These are the top-level command groups shown by `rookcue --help`:
 
 - `init`
 - `task`
@@ -251,16 +251,16 @@ ROOT="$(mktemp -d /tmp/growth-memory-demo.XXXXXX)"
 PROJECT_ROOT="$ROOT/project"
 PERSONAL_ROOT="$ROOT/personal"
 
-growth-memory init --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
+rookcue init --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
 
-TASK_JSON="$(growth-memory task start \
+TASK_JSON="$(rookcue task start \
   --project "$PROJECT_ROOT" \
   --title "Document agent workflow" \
   --goal "Verify the complete system" \
   --json)"
 TASK_ID="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.data.id);' "$TASK_JSON")"
 
-EVENT_JSON="$(growth-memory task event \
+EVENT_JSON="$(rookcue task event \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --type evidence-collected \
@@ -269,7 +269,7 @@ EVENT_JSON="$(growth-memory task event \
   --json)"
 EVENT_ID="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.data.id);' "$EVENT_JSON")"
 
-CHECKPOINT_JSON="$(growth-memory task checkpoint \
+CHECKPOINT_JSON="$(rookcue task checkpoint \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --reason interrupt \
@@ -277,40 +277,40 @@ CHECKPOINT_JSON="$(growth-memory task checkpoint \
   --json)"
 CHECKPOINT_ID="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.data.id);' "$CHECKPOINT_JSON")"
 
-growth-memory task complete \
+rookcue task complete \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --summary "Completed the evidence-backed workflow draft and queued it for deep review." \
   --json
 
-growth-memory review recommend \
+rookcue review recommend \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --signal architecture-change transferable-learning ai-heavy \
   --json
 
-REVIEW_JSON="$(growth-memory review start \
+REVIEW_JSON="$(rookcue review start \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --level deep \
   --json)"
 REVIEW_ID="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.data.id);' "$REVIEW_JSON")"
 
-growth-memory review respond --project "$PROJECT_ROOT" --review "$REVIEW_ID" --phase context --text "I accept the deep review level for this task." --json
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
-growth-memory review respond --project "$PROJECT_ROOT" --review "$REVIEW_ID" --phase reconstruct --text "The reliable path is init, task evidence, checkpoint, complete, then deep review." --evidence "task:$TASK_ID" "event:$EVENT_ID" --json
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
-growth-memory review question --project "$PROJECT_ROOT" --review "$REVIEW_ID" --text "What breaks if the evolution entry is not tied back to evidence?" --json
-growth-memory review respond --project "$PROJECT_ROOT" --review "$REVIEW_ID" --phase challenge --text "The review loses traceability and future transfer stops being trustworthy." --evidence "review:$REVIEW_ID" --json
-growth-memory review interrupt --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
-growth-memory review resume --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
-growth-memory review correct --project "$PROJECT_ROOT" --review "$REVIEW_ID" --text "Record the promoted lesson only after the evidence chain is explicit." --evidence commit:docs-task-8 --json
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
-growth-memory review transfer --project "$PROJECT_ROOT" --review "$REVIEW_ID" --text "In another repo, I would demand evidence before promoting any reusable guidance." --evidence test:transfer-exercise --json
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review respond --project "$PROJECT_ROOT" --review "$REVIEW_ID" --phase context --text "I accept the deep review level for this task." --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review respond --project "$PROJECT_ROOT" --review "$REVIEW_ID" --phase reconstruct --text "The reliable path is init, task evidence, checkpoint, complete, then deep review." --evidence "task:$TASK_ID" "event:$EVENT_ID" --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review question --project "$PROJECT_ROOT" --review "$REVIEW_ID" --text "What breaks if the evolution entry is not tied back to evidence?" --json
+rookcue review respond --project "$PROJECT_ROOT" --review "$REVIEW_ID" --phase challenge --text "The review loses traceability and future transfer stops being trustworthy." --evidence "review:$REVIEW_ID" --json
+rookcue review interrupt --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review resume --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review correct --project "$PROJECT_ROOT" --review "$REVIEW_ID" --text "Record the promoted lesson only after the evidence chain is explicit." --evidence commit:docs-task-8 --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review transfer --project "$PROJECT_ROOT" --review "$REVIEW_ID" --text "In another repo, I would demand evidence before promoting any reusable guidance." --evidence test:transfer-exercise --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 
-growth-memory evolution add \
+rookcue evolution add \
   --project "$PROJECT_ROOT" \
   --title "Promote only evidence-backed lessons" \
   --before "Review notes were disconnected from durable knowledge." \
@@ -320,7 +320,7 @@ growth-memory evolution add \
   --evidence "task:$TASK_ID" "event:$EVENT_ID" "checkpoint:$CHECKPOINT_ID" \
   --json
 
-CANDIDATES_JSON="$(growth-memory knowledge propose \
+CANDIDATES_JSON="$(rookcue knowledge propose \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --review "$REVIEW_ID" \
@@ -331,12 +331,12 @@ CANDIDATES_JSON="$(growth-memory knowledge propose \
 CANDIDATE_1="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.data[0].id);' "$CANDIDATES_JSON")"
 CANDIDATE_2="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.data[1].id);' "$CANDIDATES_JSON")"
 
-growth-memory knowledge decide --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --candidate "$CANDIDATE_1" --decision reject --actor human --source "interactive review rejection" --json
+rookcue knowledge decide --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --candidate "$CANDIDATE_1" --decision reject --actor human --source "interactive review rejection" --json
 # expected failure until a human approves the candidate
-growth-memory knowledge promote --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --candidate "$CANDIDATE_2" --confidence 0.82 --json
-growth-memory knowledge decide --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --candidate "$CANDIDATE_2" --decision approve --actor human --source "interactive review approval" --json
+rookcue knowledge promote --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --candidate "$CANDIDATE_2" --confidence 0.82 --json
+rookcue knowledge decide --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --candidate "$CANDIDATE_2" --decision approve --actor human --source "interactive review approval" --json
 
-CONCEPT_JSON="$(growth-memory knowledge promote \
+CONCEPT_JSON="$(rookcue knowledge promote \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --candidate "$CANDIDATE_2" \
@@ -344,7 +344,7 @@ CONCEPT_JSON="$(growth-memory knowledge promote \
   --json)"
 CONCEPT_ID="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.data.id);' "$CONCEPT_JSON")"
 
-growth-memory capability update \
+rookcue capability update \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --concept "$CONCEPT_ID" \
@@ -374,7 +374,7 @@ Both roots are plain files. You can back them up independently with git, rsync, 
 
 ## Phase 2 local personal growth
 
-The source CLI now supports `gmem growth quality`, `recommend`, `capture`, `due`,
+The source CLI now supports `rookcue growth quality`, `recommend`, `capture`, `due`,
 `recall`, `defer`, `resume`, `history`, and `report`. Supply `--project DIR` and
 `--personal DIR` explicitly; use `--json` for a one-line envelope. Reports default
 to deterministic Markdown; `--format json` is equivalent to `--json`.
@@ -394,5 +394,5 @@ Reports, caches, project identity and credentials are excluded. Divergent files
 remain explicit conflicts. Every capability writer must use the Phase 2 runtime
 after v2 upgrade. Beta7 runtime/plugin metadata reports
 `0.1.0-beta.7`; historical beta.5 reported `0.1.0`, so older builds still need
-`gmem growth --help` and provenance checks. See the [upgrade guide](docs/phase-2-beta-upgrade.md)
+`rookcue growth --help` and provenance checks. See the [upgrade guide](docs/phase-2-beta-upgrade.md)
 and [native build guide](docs/binary-build.md).

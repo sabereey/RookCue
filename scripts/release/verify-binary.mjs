@@ -72,7 +72,7 @@ async function main() {
   assert.equal(run(binaryPath, ["--version"]).trim(), version);
   assert.match(
     run(binaryPath, ["--help"]),
-    /^Usage: growth-memory \[options\] \[command\]/m,
+    /^Usage: rookcue \[options\] \[command\]/m,
   );
 
   const root = await mkdtemp(join(tmpdir(), "gmem-binary-verify-"));

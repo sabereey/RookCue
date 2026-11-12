@@ -1,12 +1,13 @@
 # RookCue Codex Plugin
 
-This plugin teaches Codex to use the local `growth-memory` CLI as a background protocol for non-trivial coding work.
+This plugin teaches Codex to use the local `rookcue` CLI as a background protocol for non-trivial coding work.
 
-It does not replace the CLI. The local machine still needs `growth-memory` or `gmem` on `PATH`.
+It does not replace the CLI. The local machine needs `rookcue` on `PATH`. The aliases `gmem` and
+`growth-memory` are also supported.
 
 ## What It Does
 
-- Starts and completes growth-memory tasks in the background.
+- Starts and completes rookcue tasks in the background.
 - Records important events and checkpoints.
 - Recommends `skip`, `quick`, or `deep` review after useful work.
 - Keeps ordinary review prompts lightweight.
@@ -44,6 +45,6 @@ LICENSE.
 The source skill includes capture after actual task closure and human review,
 read-only quality/due/history/recommend/report, and voluntary explicit human
 feedback. Beta7 runtime/plugin report `0.1.0-beta.7`. It retains the
-`gmem growth --help` check because historical `0.1.0` builds do not identify
+`rookcue growth --help` check because historical `0.1.0` builds do not identify
 Phase 2 support. All capability v2 writers need the new runtime.
 Install the matching plugin and start a new Codex session after upgrading. Due dates suggest practice.

@@ -58,13 +58,19 @@ function runCli(
   });
 }
 
-it("exposes gmem as the official short package command", async () => {
+it("exposes rookcue with compatible gmem and growth-memory commands", async () => {
   const packageJson = JSON.parse(
     await readFile(join(repoRoot, "package.json"), "utf8"),
   ) as { bin?: Record<string, string> };
 
-  expect(packageJson.bin?.["growth-memory"]).toBe("./dist/src/cli.js");
-  expect(packageJson.bin?.gmem).toBe("./dist/src/cli.js");
+  const lock = JSON.parse(await readFile(join(repoRoot, "package-lock.json"), "utf8"));
+  for (const command of ["rookcue", "gmem", "growth-memory"]) {
+    expect(packageJson.bin?.[command]).toBe("./dist/src/cli.js");
+    expect(lock.packages[""].bin[command]).toBe("dist/src/cli.js");
+  }
+  const result = runCli(["--help"]);
+  expect(result.status, result.stderr).toBe(0);
+  expect(result.stdout).toContain("Usage: rookcue [options] [command]");
 });
 
 it("reports the same release identity from development and compiled commands", async () => {

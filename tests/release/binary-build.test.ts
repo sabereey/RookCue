@@ -70,5 +70,5 @@ it("verifies native help through the empty-PATH runner", async () => {
   );
 
   expect(script).toContain('run(binaryPath, ["--help"])');
-  expect(script).toContain("^Usage: growth-memory \\[options\\] \\[command\\]");
+  expect(script).toContain("^Usage: rookcue \\[options\\] \\[command\\]");
 });

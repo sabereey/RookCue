@@ -3,7 +3,7 @@
 ## 1. 项目定位
 
 RookCue 是一个本地优先的 TypeScript/Node.js CLI。正式命令是
-`growth-memory`，官方短命令是 `gmem`。它不是普通的“AI 会话记忆”工具，而是围绕个人成长设计的项目记忆协议：
+`rookcue`，官方短命令是 `gmem`，兼容别名是 `growth-memory`。它不是普通的“AI 会话记忆”工具，而是围绕个人成长设计的项目记忆协议：
 
 - 在项目内记录任务、事件、checkpoint、当前知识和演进记录。
 - 用可解释的规则推荐是否需要复盘。
@@ -456,7 +456,7 @@ Commander CLI 入口。
 命令：
 
 ```bash
-growth-memory init --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
+rookcue init --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
 ```
 
 作用：
@@ -470,7 +470,7 @@ growth-memory init --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
 命令：
 
 ```bash
-growth-memory status \
+rookcue status \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT"
 ```
@@ -487,7 +487,7 @@ growth-memory status \
 开始任务：
 
 ```bash
-growth-memory task start \
+rookcue task start \
   --project "$PROJECT_ROOT" \
   --title "Document agent workflow" \
   --goal "Verify the complete system" \
@@ -497,7 +497,7 @@ growth-memory task start \
 记录事件：
 
 ```bash
-growth-memory task event \
+rookcue task event \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --type evidence-collected \
@@ -509,7 +509,7 @@ growth-memory task event \
 记录 checkpoint：
 
 ```bash
-growth-memory task checkpoint \
+rookcue task checkpoint \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --reason interrupt \
@@ -520,7 +520,7 @@ growth-memory task checkpoint \
 完成任务：
 
 ```bash
-growth-memory task complete \
+rookcue task complete \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --summary "Completed the workflow." \
@@ -539,13 +539,13 @@ growth-memory task complete \
 显示上下文：
 
 ```bash
-growth-memory context show --project "$PROJECT_ROOT" --json
+rookcue context show --project "$PROJECT_ROOT" --json
 ```
 
 更新稳定上下文：
 
 ```bash
-growth-memory context update \
+rookcue context update \
   --project "$PROJECT_ROOT" \
   --markdown "# Current Knowledge\n\nThe project uses evidence-backed reviews before promoting personal knowledge." \
   --evidence "task:$TASK_ID" \
@@ -564,7 +564,7 @@ growth-memory context update \
 命令：
 
 ```bash
-growth-memory evolution add \
+rookcue evolution add \
   --project "$PROJECT_ROOT" \
   --title "Promote only evidence-backed lessons" \
   --before "Review notes were disconnected from durable knowledge." \
@@ -586,7 +586,7 @@ growth-memory evolution add \
 命令：
 
 ```bash
-growth-memory review recommend \
+rookcue review recommend \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --signal architecture-change transferable-learning ai-heavy \
@@ -607,7 +607,7 @@ growth-memory review recommend \
 开始 review：
 
 ```bash
-growth-memory review start \
+rookcue review start \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --level deep \
@@ -618,14 +618,14 @@ growth-memory review start \
 context 阶段，人类确认选择：
 
 ```bash
-growth-memory review respond \
+rookcue review respond \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --phase context \
   --text "I accept the deep review level." \
   --json
 
-growth-memory review advance \
+rookcue review advance \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --json
@@ -634,7 +634,7 @@ growth-memory review advance \
 reconstruct 阶段，人类主动重建：
 
 ```bash
-growth-memory review respond \
+rookcue review respond \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --phase reconstruct \
@@ -646,14 +646,14 @@ growth-memory review respond \
 challenge 阶段，AI 问、人类答：
 
 ```bash
-growth-memory review question \
+rookcue review question \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --template five-whys \
   --text "What breaks if evolution is not tied back to evidence?" \
   --json
 
-growth-memory review respond \
+rookcue review respond \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --phase challenge \
@@ -665,7 +665,7 @@ growth-memory review respond \
 correct 阶段，AI 提供带证据校正：
 
 ```bash
-growth-memory review correct \
+rookcue review correct \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --text "Promote the lesson only after the evidence chain is explicit." \
@@ -676,7 +676,7 @@ growth-memory review correct \
 transfer 阶段，人类做迁移回答：
 
 ```bash
-growth-memory review transfer \
+rookcue review transfer \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --template feynman \
@@ -698,7 +698,7 @@ growth-memory review transfer \
 中断：
 
 ```bash
-growth-memory review interrupt \
+rookcue review interrupt \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --json
@@ -707,7 +707,7 @@ growth-memory review interrupt \
 恢复：
 
 ```bash
-growth-memory review resume \
+rookcue review resume \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --json
@@ -724,7 +724,7 @@ growth-memory review resume \
 命令：
 
 ```bash
-growth-memory knowledge propose \
+rookcue knowledge propose \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --review "$REVIEW_ID" \
@@ -744,7 +744,7 @@ growth-memory knowledge propose \
 审批：
 
 ```bash
-growth-memory knowledge decide \
+rookcue knowledge decide \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --candidate "$CANDIDATE_ID" \
@@ -757,7 +757,7 @@ growth-memory knowledge decide \
 晋升：
 
 ```bash
-growth-memory knowledge promote \
+rookcue knowledge promote \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --candidate "$CANDIDATE_ID" \
@@ -779,7 +779,7 @@ growth-memory knowledge promote \
 列出已晋升知识：
 
 ```bash
-growth-memory knowledge list \
+rookcue knowledge list \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT"
 ```
@@ -787,7 +787,7 @@ growth-memory knowledge list \
 按 ID 查看单条知识：
 
 ```bash
-growth-memory knowledge show \
+rookcue knowledge show \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --concept "$CONCEPT_ID"
@@ -812,7 +812,7 @@ growth-memory knowledge show \
 命令：
 
 ```bash
-growth-memory knowledge revise \
+rookcue knowledge revise \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --concept "$CONCEPT_ID" \
@@ -834,7 +834,7 @@ growth-memory knowledge revise \
 命令：
 
 ```bash
-growth-memory capability update \
+rookcue capability update \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --concept "$CONCEPT_ID" \
@@ -854,7 +854,7 @@ growth-memory capability update \
 命令：
 
 ```bash
-growth-memory capability list \
+rookcue capability list \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --json
@@ -952,7 +952,7 @@ node dist/src/cli.js --help
 
 ```bash
 npm link
-growth-memory --help
+rookcue --help
 ```
 
 ### 10.5 测试
@@ -1040,7 +1040,7 @@ tests/cli/full-workflow.test.ts
 
 1. 读取本文档理解系统结构。
 2. 读取 `README.md` 获取命令速查。
-3. 运行 `growth-memory context show --project <project> --json` 获取项目现场。
+3. 运行 `rookcue context show --project <project> --json` 获取项目现场。
 4. 如果存在 active task，读取 latest checkpoint。
 5. 对重要修改先写 task event 或 checkpoint。
 6. 完成任务后，根据信号调用 `review recommend`。

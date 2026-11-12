@@ -1,14 +1,14 @@
 # Upgrade Phase 2 data
 
 Build the current version and use it on every device that writes to the same
-personal knowledge store. Use `gmem growth --help` to confirm support before
+personal knowledge store. Use `rookcue growth --help` to confirm support before
 upgrading a legacy capability record.
 
 1. Preserve the previous executable and take a complete backup of both project
    `.growth-memory` and personal knowledge roots. Keep credentials and backups
    private. Pause old devices that write the same personal store.
-2. Follow the [source install guide](../README.md#install). Check `gmem --version`
-   and `gmem growth --help` before replacing the previous installation.
+2. Follow the [source install guide](../README.md#install). Check `rookcue --version`
+   and `rookcue growth --help` before replacing the previous installation.
 3. Install the matching Codex plugin and start a fresh chat. Check the runtime
    on each writing device before enabling capability changes.
 4. Read `growth history`, `quality`, `due` and `report` with explicit `--project`

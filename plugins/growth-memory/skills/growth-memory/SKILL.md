@@ -5,7 +5,7 @@ description: Use when Codex is doing non-trivial coding or project work and shou
 
 # RookCue
 
-Use `growth-memory` as Codex's background protocol for non-trivial coding work.
+Use `rookcue` as Codex's background protocol for non-trivial coding work.
 
 ## Activation
 
@@ -35,11 +35,12 @@ Use `--project` as the current repository root.
 
 Use `--personal` as `$HOME/.growth-memory`.
 
-Prefer `gmem` when available on `PATH`. Fall back to `growth-memory` when `gmem` is missing.
+Prefer `rookcue` when available on `PATH`. Otherwise use `gmem`, then
+`growth-memory`. Use the available executable in the examples below.
 
 ## User Contract
 
-Do not ask the user to run `growth-memory` commands manually.
+Do not ask the user to run `rookcue` commands manually.
 
 Run CLI commands in the background and only interrupt the user for:
 
@@ -55,19 +56,19 @@ Never promote personal knowledge without explicit human approval.
 At the start of non-trivial work:
 
 ```bash
-growth-memory task start --project "$PWD" --title "<short task title>" --goal "<task goal>" --json
+rookcue task start --project "$PWD" --title "<short task title>" --goal "<task goal>" --json
 ```
 
 During work, record important events:
 
 ```bash
-growth-memory task event --project "$PWD" --task "$TASK_ID" --type "<event-type>" --summary "<summary>" --evidence "task:$TASK_ID" --json
+rookcue task event --project "$PWD" --task "$TASK_ID" --type "<event-type>" --summary "<summary>" --evidence "task:$TASK_ID" --json
 ```
 
 At completion:
 
 ```bash
-growth-memory task complete --project "$PWD" --task "$TASK_ID" --summary "<final outcome>" --json
+rookcue task complete --project "$PWD" --task "$TASK_ID" --summary "<final outcome>" --json
 ```
 
 ## Review Recommendation
@@ -111,8 +112,8 @@ After a completed review, propose candidates in plain language.
 Only after explicit approval:
 
 ```bash
-growth-memory knowledge decide --project "$PWD" --personal "$HOME/.growth-memory" --candidate "$CANDIDATE_ID" --decision approve --actor human --source "<human approval source>" --json
-growth-memory knowledge promote --project "$PWD" --personal "$HOME/.growth-memory" --candidate "$CANDIDATE_ID" --confidence <0..1> --json
+rookcue knowledge decide --project "$PWD" --personal "$HOME/.growth-memory" --candidate "$CANDIDATE_ID" --decision approve --actor human --source "<human approval source>" --json
+rookcue knowledge promote --project "$PWD" --personal "$HOME/.growth-memory" --candidate "$CANDIDATE_ID" --confidence <0..1> --json
 ```
 
 After successful promotion, show the payoff immediately:
@@ -126,8 +127,8 @@ The user should feel that review produced a durable asset, not that they filled 
 
 ## Phase 2 local growth reference
 
-When the available runtime supports `gmem growth --help` (use `growth-memory`
-if that is the available executable), use these additional commands. Phase 2 first shipped in Beta7. The current runtime
+When the available runtime supports `rookcue growth --help` (substitute the
+available alias when needed), use these additional commands. Phase 2 first shipped in Beta7. The current runtime
 and plugin report `0.1.0-beta.8`. Historical beta.5 reported `0.1.0`; for older
 builds that version alone is insufficient, so keep the command-support check.
 When runtime or growth support is absent, continue ordinary work and briefly
@@ -137,8 +138,8 @@ After the task is actually closed and its human review is completed, explicitly
 capture the selected project's minimal review history for later reports:
 
 ```bash
-gmem growth capture --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
-gmem growth due --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
+rookcue growth capture --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
+rookcue growth due --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
 ```
 
 Capture can be retried; inspect `captured`, `reused`, and `skipped`. A skipped

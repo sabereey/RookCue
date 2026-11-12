@@ -2,14 +2,15 @@
 
 This guide is for Codex, Claude Code, Cursor, Windsurf, and other coding agents that should use RookCue as a background protocol.
 
-`gmem` is the approved agent runtime command. Agents must detect `gmem` on
-`PATH`; do not check for or fall back to `growth-memory` or `gm`.
+`rookcue` is the preferred agent runtime command. Detect it on `PATH`, then
+fall back to `gmem` or `growth-memory` for an existing installation. Use the
+available command in the examples below.
 
-Build and install `gmem` from source using [the installation guide](README.md#install)
+Build and install `rookcue` from source using [the installation guide](README.md#install)
 before adding the plugin. Agents should detect the installed command on `PATH`.
 Keep credentials and personal storage paths out of task output.
 
-The user should not have to run `growth-memory` commands manually. Agents should call the CLI in the background and only interrupt the user for human judgment.
+The user should not have to run `rookcue` commands manually. Agents should call the CLI in the background and only interrupt the user for human judgment.
 
 For the human-facing first run, see [QUICKSTART.md](QUICKSTART.md).
 For detailed architecture and module behavior, see [docs/project-documentation.md](docs/project-documentation.md).
@@ -39,9 +40,9 @@ Before I show the summary, please reconstruct what changed and why.
 The user should not see instructions like:
 
 ```text
-Run gmem task start ...
-Run gmem review advance ...
-Run gmem knowledge promote ...
+Run rookcue task start ...
+Run rookcue review advance ...
+Run rookcue knowledge promote ...
 ```
 
 ## 2. Global Codex Setup
@@ -57,7 +58,8 @@ A useful global rule is:
 ```md
 # Global RookCue Protocol
 
-For every non-trivial coding task, automatically use `gmem` when it is available on `PATH`.
+For every non-trivial coding task, use the first available command on `PATH`
+in this order: `rookcue`, `gmem`, `growth-memory`.
 
 Use:
 
@@ -66,7 +68,7 @@ Use:
 
 Do not ask the user whether to enable RookCue every time.
 
-Initialize `gmem` automatically when needed. Record task starts, important events, checkpoints, failures, decisions, and task completion in the background.
+Initialize `rookcue` automatically when needed. Record task starts, important events, checkpoints, failures, decisions, and task completion in the background.
 
 After completing a task, recommend `skip`, `quick`, or `deep` review based on task signals.
 
@@ -76,7 +78,7 @@ Only interrupt the user for human judgment:
 - Reconstruction answers.
 - Knowledge approval or rejection.
 
-Never ask the user to manually run `gmem` commands.
+Never ask the user to manually run `rookcue` commands.
 
 Skip RookCue only for trivial Q&A, pure explanation, or explicitly temporary scratch work.
 ```
@@ -89,17 +91,17 @@ At the start of a task, the agent should silently check:
 
 1. Is this a coding or project-work task?
 2. Is it non-trivial?
-3. Is `gmem` available on `PATH`?
+3. Is `rookcue`, `gmem`, or `growth-memory` available on `PATH`?
 4. Is the current directory a reasonable project root?
 5. Is the user asking for temporary scratch work or pure explanation?
 
 If checks pass, initialize the memory roots:
 
 ```bash
-gmem init --project "$PWD" --personal "$HOME/.growth-memory" --json
+rookcue init --project "$PWD" --personal "$HOME/.growth-memory" --json
 ```
 
-If `gmem` is unavailable, continue the user's task normally and mention the
+If all three commands are unavailable, continue the user's task normally and mention the
 missing runtime only when memory behavior is relevant to the request.
 
 ## 4. When To Use It
@@ -129,7 +131,7 @@ Skip it for:
 When starting work, create or resume a task:
 
 ```bash
-gmem task start \
+rookcue task start \
   --project "$PWD" \
   --title "<short task title>" \
   --goal "<task goal>" \
@@ -139,7 +141,7 @@ gmem task start \
 During work, record important events:
 
 ```bash
-gmem task event \
+rookcue task event \
   --project "$PWD" \
   --task "$TASK_ID" \
   --type "<event-type>" \
@@ -162,7 +164,7 @@ Good event types include:
 Before risky edits, long pauses, or context-heavy transitions, record a checkpoint:
 
 ```bash
-gmem task checkpoint \
+rookcue task checkpoint \
   --project "$PWD" \
   --task "$TASK_ID" \
   --reason manual \
@@ -173,7 +175,7 @@ gmem task checkpoint \
 At completion:
 
 ```bash
-gmem task complete \
+rookcue task complete \
   --project "$PWD" \
   --task "$TASK_ID" \
   --summary "<final task outcome>" \
@@ -185,7 +187,7 @@ gmem task complete \
 After completing a task, recommend a review level:
 
 ```bash
-gmem review recommend \
+rookcue review recommend \
   --project "$PWD" \
   --task "$TASK_ID" \
   --signal <signals...> \
@@ -253,26 +255,26 @@ generation, evidence linking, and promotion mechanics after approval.
 Then record the human confirmation:
 
 ```bash
-gmem review start \
+rookcue review start \
   --project "$PWD" \
   --task "$TASK_ID" \
   --level deep \
   --json
 
-gmem review respond \
+rookcue review respond \
   --project "$PWD" \
   --review "$REVIEW_ID" \
   --phase context \
   --text "<human accepted/revised review level>" \
   --json
 
-gmem review advance --project "$PWD" --review "$REVIEW_ID" --json
+rookcue review advance --project "$PWD" --review "$REVIEW_ID" --json
 ```
 
 Record the user's reconstruction:
 
 ```bash
-gmem review respond \
+rookcue review respond \
   --project "$PWD" \
   --review "$REVIEW_ID" \
   --phase reconstruct \
@@ -280,7 +282,7 @@ gmem review respond \
   --evidence "task:$TASK_ID" \
   --json
 
-gmem review advance --project "$PWD" --review "$REVIEW_ID" --json
+rookcue review advance --project "$PWD" --review "$REVIEW_ID" --json
 ```
 
 Challenge, correction, and transfer should stay grounded in the actual task. Avoid generic interview questions.
@@ -288,14 +290,14 @@ Challenge, correction, and transfer should stay grounded in the actual task. Avo
 Optional review method templates can shape selected nodes without replacing the main flow:
 
 ```bash
-gmem review question \
+rookcue review question \
   --project "$PWD" \
   --review "$REVIEW_ID" \
   --template five-whys \
   --text "<task-specific challenge focus>" \
   --json
 
-gmem review transfer \
+rookcue review transfer \
   --project "$PWD" \
   --review "$REVIEW_ID" \
   --template feynman \
@@ -332,7 +334,7 @@ Approve, reject, or revise?
 Only after explicit user approval:
 
 ```bash
-gmem knowledge decide \
+rookcue knowledge decide \
   --project "$PWD" \
   --personal "$HOME/.growth-memory" \
   --candidate "$CANDIDATE_ID" \
@@ -341,7 +343,7 @@ gmem knowledge decide \
   --source "<human approval source>" \
   --json
 
-gmem knowledge promote \
+rookcue knowledge promote \
   --project "$PWD" \
   --personal "$HOME/.growth-memory" \
   --candidate "$CANDIDATE_ID" \
@@ -377,12 +379,12 @@ These commands export and verify local personal knowledge, preview imports, and
 show search results, timelines, and digests:
 
 ```bash
-gmem personal export --project "$PWD" --personal "$HOME/.growth-memory" --out "$OUT_DIR" --json
-gmem personal verify --project "$PWD" --personal "$HOME/.growth-memory" --bundle "$EXPORT_ROOT" --json
-gmem personal import --project "$PWD" --personal "$HOME/.growth-memory" --bundle "$EXPORT_ROOT" --dry-run --json
-gmem knowledge search --project "$PWD" --personal "$HOME/.growth-memory" --query "<text>" --json
-gmem knowledge timeline --project "$PWD" --personal "$HOME/.growth-memory" --json
-gmem knowledge digest --project "$PWD" --personal "$HOME/.growth-memory" --json
+rookcue personal export --project "$PWD" --personal "$HOME/.growth-memory" --out "$OUT_DIR" --json
+rookcue personal verify --project "$PWD" --personal "$HOME/.growth-memory" --bundle "$EXPORT_ROOT" --json
+rookcue personal import --project "$PWD" --personal "$HOME/.growth-memory" --bundle "$EXPORT_ROOT" --dry-run --json
+rookcue knowledge search --project "$PWD" --personal "$HOME/.growth-memory" --query "<text>" --json
+rookcue knowledge timeline --project "$PWD" --personal "$HOME/.growth-memory" --json
+rookcue knowledge digest --project "$PWD" --personal "$HOME/.growth-memory" --json
 ```
 
 Agents must not run `personal import` without `--dry-run` in this phase.
@@ -394,7 +396,7 @@ Only update capability level when there is behavior evidence.
 Use `explainable` when the user passed an explanation or transfer exercise:
 
 ```bash
-gmem capability update \
+rookcue capability update \
   --project "$PWD" \
   --personal "$HOME/.growth-memory" \
   --concept "$CONCEPT_ID" \
@@ -446,7 +448,7 @@ Do not ask the user to:
 
 Before work:
 
-- Check `gmem --help`.
+- Check `rookcue --help`.
 - Initialize roots.
 - Start task if appropriate.
 
@@ -463,11 +465,11 @@ After work:
 - Propose knowledge only after completed review.
 - Promote knowledge only after explicit human approval.
 
-This is the important line: `gmem` is the agent's background protocol, not the user's manual checklist.
+This is the important line: `rookcue` is the agent's background protocol, not the user's manual checklist.
 
 ## Phase 2 source runtime
 
-Check concrete `gmem growth --help` support before growth commands; the old beta
+Check concrete `rookcue growth --help` support before growth commands; the old beta
 reported `0.1.0`; Beta7 runtime/plugin report `0.1.0-beta.7`. Keep the command
 check for older source builds. If unavailable, continue ordinary work
 and briefly disclose the limitation without asking the user to run commands.
@@ -488,7 +490,7 @@ changes do not deploy runtime/plugin cache updates. See the source plugin
 
 ## Explicit LAN synchronization
 
-When the user requests device-direct LAN transfer, use `gmem peer` and the
+When the user requests device-direct LAN transfer, use `rookcue peer` and the
 [LAN operational guide](docs/lan-direct-sync.md). Use the same-version runtime
 on both endpoints; keep invitation secrets outside chat, logs and task memory.
 Start a bounded pairing-only listener, then a separate strict mTLS server;

@@ -896,9 +896,9 @@ async function main(argv = process.argv): Promise<void> {
   const program = new Command();
 
   program
-    .name("growth-memory")
+    .name("rookcue")
     .version(packageMetadata.version)
-    .description("Filesystem-backed growth memory protocol CLI. Official short command: gmem.")
+    .description("RookCue local-first experience library. Short command: gmem. Compatibility alias: growth-memory.")
     .showHelpAfterError(false)
     .exitOverride()
     .configureOutput({

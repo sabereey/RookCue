@@ -1,7 +1,7 @@
 # RookCue 快速上手
 
-这份文档面向第一次使用 `growth-memory` 的人。正式命令是
-`growth-memory`，推荐日常短命令是 `gmem`；两者指向同一个 CLI。它分成三段：
+这份文档面向第一次使用 `rookcue` 的人。正式命令是
+`rookcue`，日常短命令是 `gmem`，兼容别名是 `growth-memory`。三个入口指向同一个 CLI。本文分成三段：
 
 - 3 分钟最小体验：看到项目记忆开始工作。
 - 完整复盘闭环：理解 deep review 怎样把 AI 协作变成主动学习。
@@ -27,11 +27,12 @@ npm link
 确认命令可用：
 
 ```bash
-growth-memory --help
+rookcue --help
 gmem --help
+growth-memory --help
 ```
 
-如果你本机没有其它 `gm` 命令，可以自行设置 `alias gm=gmem`。`gm`
+如果你本机没有其它 `gm` 命令，可以自行设置 `alias gm=rookcue`。`gm`
 不是默认安装命令，避免和其它工具或个人 alias 冲突。
 
 ## 2. 准备演示目录
@@ -60,7 +61,7 @@ gm_id() {
 初始化：
 
 ```bash
-growth-memory init --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
+rookcue init --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
 ```
 
 初始化后会得到两套文件系统：
@@ -73,17 +74,17 @@ $PERSONAL_ROOT/
 可以用一条命令确认当前状态：
 
 ```bash
-growth-memory status --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
+rookcue status --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
 ```
 
 ## 3. 3 分钟最小体验
 
-这一步只验证一件事：`growth-memory` 可以开始记录项目现场。
+这一步只验证一件事：`rookcue` 可以开始记录项目现场。
 
 ### 3.1 开始任务
 
 ```bash
-TASK_JSON="$(growth-memory task start \
+TASK_JSON="$(rookcue task start \
   --project "$PROJECT_ROOT" \
   --title "Try the memory workflow" \
   --goal "Understand the smallest useful path" \
@@ -95,7 +96,7 @@ TASK_ID="$(gm_id "$TASK_JSON")"
 ### 3.2 记录一个事件
 
 ```bash
-EVENT_JSON="$(growth-memory task event \
+EVENT_JSON="$(rookcue task event \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --type evidence-collected \
@@ -109,7 +110,7 @@ EVENT_ID="$(gm_id "$EVENT_JSON")"
 ### 3.3 查看当前上下文
 
 ```bash
-growth-memory context show --project "$PROJECT_ROOT" --json
+rookcue context show --project "$PROJECT_ROOT" --json
 ```
 
 这时你已经能看到项目工作现场。也可以直接看文件：
@@ -127,7 +128,7 @@ find "$PROJECT_ROOT/.growth-memory" -maxdepth 3 -type f | sort
 ### 4.1 记录 checkpoint
 
 ```bash
-CHECKPOINT_JSON="$(growth-memory task checkpoint \
+CHECKPOINT_JSON="$(rookcue task checkpoint \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --reason manual \
@@ -140,7 +141,7 @@ CHECKPOINT_ID="$(gm_id "$CHECKPOINT_JSON")"
 ### 4.2 完成任务
 
 ```bash
-growth-memory task complete \
+rookcue task complete \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --summary "Finished the first demo task." \
@@ -150,7 +151,7 @@ growth-memory task complete \
 ### 4.3 请求复盘建议
 
 ```bash
-growth-memory review recommend \
+rookcue review recommend \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --signal transferable-learning ai-heavy \
@@ -162,7 +163,7 @@ growth-memory review recommend \
 ### 4.4 开启 deep review
 
 ```bash
-REVIEW_JSON="$(growth-memory review start \
+REVIEW_JSON="$(rookcue review start \
   --project "$PROJECT_ROOT" \
   --task "$TASK_ID" \
   --level deep \
@@ -174,14 +175,14 @@ REVIEW_ID="$(gm_id "$REVIEW_JSON")"
 ### 4.5 人类确认复盘等级
 
 ```bash
-growth-memory review respond \
+rookcue review respond \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --phase context \
   --text "I accept the deep review level." \
   --json
 
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
 ### 4.6 人类主动重建
@@ -189,7 +190,7 @@ growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --j
 deep review 的关键不是让 AI 总结，而是让人先从记忆里重建一遍。
 
 ```bash
-growth-memory review respond \
+rookcue review respond \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --phase reconstruct \
@@ -197,7 +198,7 @@ growth-memory review respond \
   --evidence "task:$TASK_ID" "event:$EVENT_ID" \
   --json
 
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
 ### 4.7 AI 提问，人类回答
@@ -205,14 +206,14 @@ growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --j
 演示里你手动写入 AI question；真实使用时通常由 agent 调用这个命令。
 
 ```bash
-growth-memory review question \
+rookcue review question \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --template five-whys \
   --text "Why is the checkpoint useful here?" \
   --json
 
-growth-memory review respond \
+rookcue review respond \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --phase challenge \
@@ -220,26 +221,26 @@ growth-memory review respond \
   --evidence "checkpoint:$CHECKPOINT_ID" \
   --json
 
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
 ### 4.8 AI 给出证据校正
 
 ```bash
-growth-memory review correct \
+rookcue review correct \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --text "The important part is not just recovery, but preserving evidence-linked state." \
   --evidence "event:$EVENT_ID" \
   --json
 
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
 ### 4.9 人类完成迁移回答
 
 ```bash
-growth-memory review transfer \
+rookcue review transfer \
   --project "$PROJECT_ROOT" \
   --review "$REVIEW_ID" \
   --template feynman \
@@ -247,7 +248,7 @@ growth-memory review transfer \
   --evidence "test:transfer-exercise" \
   --json
 
-growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
+rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
 `--template` 是可选的。当前内置 `five-whys`、`aar`、`kpt`、`feynman`，只影响当前节点的问题/回答结构，不改变 deep review 主流程。
@@ -261,7 +262,7 @@ growth-memory review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --j
 ### 5.1 提出候选
 
 ```bash
-CANDIDATES_JSON="$(growth-memory knowledge propose \
+CANDIDATES_JSON="$(rookcue knowledge propose \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --review "$REVIEW_ID" \
@@ -275,7 +276,7 @@ CANDIDATE_ID="$(gm_id "$CANDIDATES_JSON")"
 ### 5.2 人类显式审批
 
 ```bash
-growth-memory knowledge decide \
+rookcue knowledge decide \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --candidate "$CANDIDATE_ID" \
@@ -288,7 +289,7 @@ growth-memory knowledge decide \
 ### 5.3 晋升为正式知识
 
 ```bash
-CONCEPT_JSON="$(growth-memory knowledge promote \
+CONCEPT_JSON="$(rookcue knowledge promote \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --candidate "$CANDIDATE_ID" \
@@ -310,7 +311,7 @@ CONCEPT_ID="$(gm_id "$CONCEPT_JSON")"
 先列出已有知识：
 
 ```bash
-growth-memory knowledge list \
+rookcue knowledge list \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT"
 ```
@@ -318,7 +319,7 @@ growth-memory knowledge list \
 再按 ID 查看单条知识：
 
 ```bash
-growth-memory knowledge show \
+rookcue knowledge show \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --concept "$CONCEPT_ID"
@@ -328,7 +329,7 @@ growth-memory knowledge show \
 默认输出面向人类阅读，会显示轻量知识卡片、沉淀时间和来源摘要；完整来源链路按需查询：
 
 ```bash
-growth-memory knowledge provenance \
+rookcue knowledge provenance \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --concept "$CONCEPT_ID"
@@ -337,22 +338,22 @@ growth-memory knowledge provenance \
 也可以在本地导出和校验个人知识，并查看搜索结果、时间线和摘要：
 
 ```bash
-growth-memory personal export --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --out "$ROOT/export"
-growth-memory personal verify --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --bundle "$ROOT/export/<export-dir>"
-growth-memory personal import --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --bundle "$ROOT/export/<export-dir>" --dry-run
-growth-memory knowledge search --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --query "checkpoint"
-growth-memory knowledge timeline --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
-growth-memory knowledge digest --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
+rookcue personal export --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --out "$ROOT/export"
+rookcue personal verify --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --bundle "$ROOT/export/<export-dir>"
+rookcue personal import --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --bundle "$ROOT/export/<export-dir>" --dry-run
+rookcue knowledge search --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --query "checkpoint"
+rookcue knowledge timeline --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
+rookcue knowledge digest --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
 ```
 
-`gmem peer` 支持局域网设备显式配对、预览和双向同步。参见 [局域网指南](docs/lan-direct-sync.md)。
+`rookcue peer` 支持局域网设备显式配对、预览和双向同步。参见 [局域网指南](docs/lan-direct-sync.md)。
 `verify` 会检查 manifest、文件大小和 SHA-256；`import --dry-run` 只预览新增/跳过，不覆盖任何个人数据。
 `search` 会解释命中原因，`timeline` 按沉淀时间展示，`digest` 会汇总最近知识、主题和较早知识。
 
 ### 5.5 更新能力等级
 
 ```bash
-growth-memory capability update \
+rookcue capability update \
   --project "$PROJECT_ROOT" \
   --personal "$PERSONAL_ROOT" \
   --concept "$CONCEPT_ID" \
@@ -364,7 +365,7 @@ growth-memory capability update \
 查看能力记录：
 
 ```bash
-growth-memory capability list --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
+rookcue capability list --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
 ```
 
 ## 6. 最值得记住的规则
@@ -389,10 +390,10 @@ With explicit selected roots, after the task is actually completed and its human
 review has finished:
 
 ```bash
-gmem growth capture --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
-gmem growth quality --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
-gmem growth due --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
-gmem growth report --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --period week
+rookcue growth capture --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
+rookcue growth quality --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
+rookcue growth due --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
+rookcue growth report --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --period week
 ```
 
 Inspect capture's `captured`, `reused`, and `skipped`; `task-not-completed` means
@@ -401,7 +402,7 @@ When you actually choose to provide recall feedback, take `revision` from the
 observed quality/due item and keep a stable operation ID for retries:
 
 ```bash
-gmem growth recall --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --concept "$CONCEPT_ID" --result recalled --revision "$REVISION" --operation "$OPERATION_ID" --actor human --source "Actual human recall response" --json
+rookcue growth recall --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --concept "$CONCEPT_ID" --result recalled --revision "$REVISION" --operation "$OPERATION_ID" --actor human --source "Actual human recall response" --json
 ```
 
 Results are `recalled|partial|forgotten`. `growth defer --until ISO` and

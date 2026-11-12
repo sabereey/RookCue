@@ -50,7 +50,7 @@ describe("growth-memory Codex plugin manifest", () => {
 
     expect(skill).toContain("Use `--project` as the current repository root");
     expect(skill).toContain("Use `--personal` as `$HOME/.growth-memory`");
-    expect(skill).toContain("Do not ask the user to run `growth-memory` commands manually");
+    expect(skill).toContain("Do not ask the user to run `rookcue` commands manually");
     expect(skill).toContain("This task has knowledge worth capturing. I recommend a 2-minute quick review.");
     expect(skill).toContain("If the user does not confirm, do not start a review session.");
     expect(skill).toContain("Recommend `deep` only when there are strong signals");

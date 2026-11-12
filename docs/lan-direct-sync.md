@@ -1,6 +1,6 @@
 # 局域网设备直连
 
-两端使用同一版本的 `gmem`，并确认 `gmem peer --help` 可用。
+两端使用同一版本的 `rookcue`，并确认 `rookcue peer --help` 可用。
 当前为同一用户两台设备的手动双向同步，双方须同时在线；每个个人根只配一个 peer。
 支持明确的私网 IPv4 地址，不使用共享目录、NAS、S3、协调服务或数据中继；没有自动
 发现、后台常驻或公网打洞。运行服务不自动修改系统防火墙、系统证书或安全设置。
@@ -16,13 +16,13 @@
 ## 配对及同步
 
 以下由各自 Mac 的 Agent 执行。`GMEM_PROJECT` 为实际项目，`GMEM_PERSONAL` 为独立
-个人知识根；不能将后者指向该项目的 `.growth-memory`。先核对两端 `gmem --version`
+个人知识根；不能将后者指向该项目的 `.growth-memory`。先核对两端 `rookcue --version`
 并备份旧程序与完整数据。验收应使用独立临时根，不对真实知识库做演示修改。
 
 Mac B 开启配对窗口，绑定 B 实际拥有的私网地址：
 
 ```sh
-gmem peer invite --project "$GMEM_PROJECT" --personal "$GMEM_PERSONAL" \
+rookcue peer invite --project "$GMEM_PROJECT" --personal "$GMEM_PERSONAL" \
   --bind 192.168.1.20 --port 0 --out "$GMEM_INVITATION_FILE" --json
 ```
 
@@ -30,7 +30,7 @@ gmem peer invite --project "$GMEM_PROJECT" --personal "$GMEM_PERSONAL" \
 通过可信方式交给 Mac A，在 A 执行：
 
 ```sh
-gmem peer pair --project "$GMEM_PROJECT" --personal "$GMEM_PERSONAL" \
+rookcue peer pair --project "$GMEM_PROJECT" --personal "$GMEM_PERSONAL" \
   --invite-file "$GMEM_INVITATION_FILE" --json
 ```
 
@@ -40,14 +40,14 @@ B 的 `peerId`，在 B 使用 `peer list` 核对 A；IP/名字不是身份。配
 B 开启 TLS 1.3 双向证书认证的正常服务，明确允许本次同步修改：
 
 ```sh
-gmem peer serve --project "$GMEM_PROJECT" --personal "$GMEM_PERSONAL" \
+rookcue peer serve --project "$GMEM_PROJECT" --personal "$GMEM_PERSONAL" \
   --bind 192.168.1.20 --port 0 --allow-apply --json
 ```
 
 A 根据本次 `ready` 地址与已配对身份，先预览：
 
 ```sh
-gmem peer sync --project "$GMEM_PROJECT" --personal "$GMEM_PERSONAL" \
+rookcue peer sync --project "$GMEM_PROJECT" --personal "$GMEM_PERSONAL" \
   --peer "$GMEM_PEER_ID" --address "$GMEM_PEER_ADDRESS" --dry-run --json
 ```
 
