@@ -4,13 +4,6 @@ This plugin teaches Codex to use the local `growth-memory` CLI as a background p
 
 It does not replace the CLI. The local machine still needs `growth-memory` or `gmem` on `PATH`.
 
-## User-Owned Remote Sync
-
-RookCue does not operate remote storage. The first supported remote
-targets are filesystem/NAS paths and S3/R2-compatible object storage owned by
-the user. Before backup or sync, agents can run `gmem cloud remote check` to
-verify the target without uploading knowledge data or exposing credentials.
-
 ## What It Does
 
 - Starts and completes growth-memory tasks in the background.
@@ -45,8 +38,6 @@ Start a new Codex thread after reinstalling so the updated skill is loaded.
 
 The integration's current source is GPL-3.0-only under the repository-root
 LICENSE.
-Optional paid knowledge presentation products are separate
-future work; this integration does not impose a paid gate on the core protocol.
 
 ### Phase 2 source guidance
 

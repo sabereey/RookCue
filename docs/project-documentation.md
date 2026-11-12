@@ -442,15 +442,10 @@ Commander CLI 入口。
 
 公共库导出入口。导出 domain、service、repository、storage helper，方便未来被其他 agent 或工具直接作为库使用。
 
-### 6.17 个人资产、云同步与分发
+### 6.17 个人资产与分发
 
 - `src/personal/personal-asset-service.ts`：导出、manifest 校验和导入预演；只处理
-  知识资产白名单，不导出云凭证、session 或 sync state。
-- `src/cloud/cloud-service.ts`：加密备份、同步规划与执行、冲突恢复、删除标记和
-  清理。manifest 版本约束在写入边界执行，本地状态在远端写入成功后更新。
-- `src/cloud/filesystem-remote.ts`、`s3-remote.ts`：实现统一远端协议；connector
-  的 capability flags 决定可用操作，不能把一个 connector 的能力推广到所有远端。
-- `src/cloud/hosted-*.ts`：保留内部测试基础，`hosted` 已不是公共 CLI 远端。
+  知识资产白名单。
 - `plugins/growth-memory/`：Codex 指令与 marketplace 层，依赖单独安装的 CLI。
 - `scripts/release/`：原生 SEA 二进制构建、打包和无 Node 环境验证。
 
@@ -809,21 +804,8 @@ growth-memory knowledge show \
 - `personal export` 把个人知识库导出为本地 plain-file bundle，并生成 manifest 和 SHA-256 文件摘要。
 - `personal verify` 重新计算导出包文件摘要，报告 missing、changed 和 extra 文件。
 - `personal import --dry-run` 只预览导入结果，报告 wouldAdd、wouldSkip 和 unsupported，不覆盖现有个人数据。
-- `cloud backup` 使用 filesystem remote adapter 将个人知识对象加密写入远端目录；remote manifest 只保存 opaque object id、object key、encrypted digest、size 和加密元数据，不暴露 clear relative path 或 plaintext source SHA-256。
-- cloud path、明文 hash 和内容元数据保存在本地 cloud sync state 或加密 object envelope 中，本地 state 作为下一次三方比较的 base。
-- `cloud restore --dry-run` 只报告 wouldAdd、wouldSkip 和 conflicts，不覆盖本地数据。
-- `cloud sync --dry-run` 计算 wouldUpload、wouldDownload、wouldSkip 和 conflicts；`cloud sync --apply` 会重新计算计划，并且只在无冲突时写入本地或远端数据。
-- `cloud conflict list/show/resolve` 提供 `cloud sync --apply` 遇到 conflicts 后的显式恢复路径；策略包括 `local`、`remote`、`both` 和 `skip`，所有策略都保留不静默覆盖的规则。
-- `cloud cleanup --dry-run/--apply` keeps remote encrypted payload cleanup separate from sync; sync can remove manifest references, while cleanup deletes eligible orphan payloads through an explicit preview/apply flow.
-- `cloud remote check` is the first BYO connector preflight. It reports a filesystem or S3/R2 target's static safety capabilities without reading or writing knowledge payloads.
-- `hosted` classes remain isolated internal contract fixtures; no public CLI command or remote target exposes managed Growth Memory storage.
-- 本地删除通过 tombstone 进入同步规划，避免把“文件缺失”误判为可以静默删除远端知识。
-- 零知识云同步下，passphrase 丢失意味着远端 encrypted payload 无法被产品方解密恢复，恢复依赖可信本地设备或 `personal export`。
-- cloud 一致性判断比较 `base`、`local`、`remote` 三方 hash；当本地和远端都相对 base 分叉时，backup/sync 会报告 conflicts，而不是静默覆盖。
 - 默认输出面向人类阅读的 Markdown；追加 `--json` 时输出稳定 JSON envelope。
 - 只读查询，不会修改项目记忆或个人知识库。
-
-第一阶段 Personal Pro Foundation 是云备份/同步/dashboard 的本地基础；当前 Cloud MVP 只使用本地 filesystem remote 验证隐私 manifest、加密备份和 dry-run 同步语义，不创建账号、不访问外网、不处理支付。
 
 ### 7.12 个人知识修订
 
@@ -880,16 +862,10 @@ growth-memory capability list \
 
 返回 `capabilities.json` 中的 records。
 
-### 7.15 个人资产与 BYO 同步
+### 7.15 个人资产迁移与检索
 
 `personal export/verify/import --dry-run` 提供资产迁移基础；
 `knowledge search/timeline/digest/provenance` 支持跨项目知识检索和阅读。
-
-`cloud remote check` 检查本地配置与 connector 能力，不上传数据，也不认证
-服务商的实际行为。`cloud backup`、`cloud sync --dry-run/--apply`、
-`cloud conflict list/show/resolve` 提供加密备份、三方比较和显式恢复。
-`cloud restore` 当前只提供 dry-run；物理对象清理由独立的 cleanup 操作处理，
-目前仅文件系统支持列举和删除。完整命令及 S3 provider 限制见根目录 README。
 
 ## 8. CLI JSON 协议
 
@@ -1049,17 +1025,13 @@ tests/cli/full-workflow.test.ts
 - capability evidence gate。
 - CLI 端到端 JSON workflow。
 
-## 13. 当前边界和后续方向
+## 13. 当前边界
 
 当前系统已经形成本地文件协议和 CLI 主流程，但仍有几个边界值得明确：
 
 - `commit` 和 `test` evidence 目前不解析真实 git/test 状态，只作为外部证据标签。
 - 没有模型 API 集成，AI 侧推荐和候选生成需要外部 agent 调用 CLI 完成。
 - `index.md` 更偏个人知识入口，当前主要写入集中在 review/concepts/capabilities。
-- 本地测试、二进制构建与 GitHub 发布验收分别记录；CI 运行、Linux 产物和
-  新用户插件安装仍须有独立验收证据，见项目状态记录。
-- 当前不运营托管知识存储，不提供账号支付或成长仪表盘；不要把旧 hosted
-  设计文档当作当前公共能力。
 - 浏览器按钮交互与 chat 回传不是这个 CLI 自身解决的问题；CLI 解决的是 agent 能以命令和 JSON 方式写入明确的人类选择。
 
 ## 14. 给后续 agent 的使用建议

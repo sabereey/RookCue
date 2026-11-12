@@ -166,100 +166,9 @@ files would be added or skipped; it does not overwrite data in this phase.
 `knowledge digest` gives a deterministic local summary of recent knowledge,
 recurring themes, and oldest concepts.
 
-Cloud MVP remote commands:
-
-```bash
-growth-memory cloud remote check --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR"
-growth-memory cloud status --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR"
-growth-memory cloud backup --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --dry-run
-growth-memory cloud backup --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE"
-growth-memory cloud restore --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --dry-run
-growth-memory cloud sync --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --dry-run
-growth-memory cloud sync --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --apply
-```
-
-Run `cloud remote check` before the first backup or sync. It validates the
-connector configuration and safety capabilities without uploading knowledge
-data. RookCue does not operate remote storage: choose a local directory,
-mounted NAS, or your own S3/R2-compatible account.
-
-If sync reports conflicts, inspect and resolve them explicitly:
-
-```bash
-growth-memory cloud conflict list --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE"
-growth-memory cloud conflict show --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --path "concepts/example.md"
-growth-memory cloud conflict resolve --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --path "concepts/example.md" --strategy remote
-```
-
-Strategies are `local`, `remote`, `both`, and `skip`. After resolving conflicts,
-run `cloud sync --apply` again to converge local and remote state.
-
-Cloud cleanup is separate from sync so deletion of encrypted payloads stays
-previewable:
-
-```bash
-growth-memory cloud cleanup --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --dry-run
-growth-memory cloud cleanup --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_DIR" --apply
-```
-
-`cloud sync --apply` can remove intentionally deleted paths from the remote
-manifest, but encrypted payload deletion is handled by cleanup. If you lose the
-cloud passphrase, growth-memory cannot decrypt remote payloads; recover from a
-trusted local device or a `personal export` backup.
-
-Remote targets can be filesystem paths or S3-compatible targets. S3-compatible
-credentials are read from environment variables rather than CLI flags:
-
-```bash
-GMEM_S3_ENDPOINT="https://<account>.r2.cloudflarestorage.com" \
-GMEM_S3_REGION="auto" \
-GMEM_S3_ACCESS_KEY_ID="..." \
-GMEM_S3_SECRET_ACCESS_KEY="..." \
-growth-memory cloud backup --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "s3://bucket/growth-memory" --passphrase "$PASSPHRASE"
-```
-
-S3 manifest writes require a provider that honors conditional `PutObject`
-requests: the first writer uses `If-None-Match: *`, and subsequent writers use
-`If-Match` with the exact observed ETag. A concurrent create/update returns
-`CLOUD_MANIFEST_REVISION_CONFLICT`; reread the remote and rerun dry-run before
-applying again. A missing ETag returns `CLOUD_MANIFEST_REVISION_REQUIRED`.
-An unsupported operation returns `CLOUD_MANIFEST_CONDITIONAL_WRITE_UNSUPPORTED`;
-the client never retries as an unconditional overwrite. Authorization and
-network errors remain visible.
-
-`cloud remote check` reports the connector's configured capabilities without
-network requests. It does not certify that an arbitrary S3-compatible provider
-enforces these headers; validate that provider before multi-device use. S3
-object listing/deletion and `cloud cleanup` remain unavailable. Failed manifest
-publication can leave encrypted orphan objects, while local sync state stays
-at the last successful publication. See the [AWS conditional-write contract](https://docs.aws.amazon.com/AmazonS3/latest/userguide/conditional-writes.html).
-
-The current BYO Remote Sync MVP uses filesystem and S3/R2-compatible adapters.
-It writes encrypted object payloads and a remote manifest under `--remote`;
-RookCue does not operate remote storage, create an account, or handle
-payments.
-
 `gmem peer` syncs personal knowledge directly between paired devices on the same
 LAN. Each sync is manually triggered. See the [LAN guide](docs/lan-direct-sync.md)
 for pairing, preview, conflicts and recovery.
-
-Restore remains dry-run only in this wave. `cloud sync --dry-run` computes the
-sync plan, and `cloud sync --apply` recomputes that plan and applies it only
-when there are no conflicts. The remote manifest is an opaque
-object index: it stores object
-ids, encrypted object keys, encrypted payload digests, sizes, and encryption
-metadata, but not clear relative paths or plaintext source SHA-256 values. Path,
-plain digest, and file content metadata live client-side or inside the encrypted
-object envelope. After a successful backup, growth-memory stores a local cloud
-sync state under the personal root; later cloud commands compare `base`,
-`local`, and decrypted `remote` hashes so backup and sync can distinguish safe
-one-sided changes from true conflicts. Backup refuses to overwrite remote
-objects when both local and remote diverged from the last synced base.
-`cloud conflict list/show/resolve` is the explicit recovery path for those
-conflicts. Local deletions are represented as tombstones in the local sync
-state, so the sync planner can distinguish "I deleted this" from "this device
-has not downloaded this yet." Cleanup can then report the encrypted payloads
-that are no longer referenced by the manifest.
 
 ## Review recommendations
 
@@ -461,7 +370,7 @@ find "$SMOKE_ROOT" -maxdepth 4 -type f -print | sort
 
 ## Backups
 
-Both roots are plain files. You can back them up independently with git, rsync, cloud sync, or whatever filesystem snapshot tool you already trust.
+Both roots are plain files. You can back them up independently with git, rsync, or filesystem snapshots.
 
 ## Phase 2 local personal growth
 
@@ -480,17 +389,10 @@ task closure and completed human review; skipped active/abandoned tasks are repo
 Reads do not capture or create roots. See [QUICKSTART](QUICKSTART.md) for feedback.
 
 Observations, minimal captured review records (without response text), and atomic
-capability v2 history are portable through export/verify/import preview and encrypted
-filesystem/S3 sync. Reports, caches, project identity, `.cloud` and credentials are
-excluded. Divergent files remain explicit conflicts. Every capability writer must
-use the Phase 2 runtime after v2 upgrade. Beta7 runtime/plugin metadata reports
+capability v2 history are portable through export, verification and import preview.
+Reports, caches, project identity and credentials are excluded. Divergent files
+remain explicit conflicts. Every capability writer must use the Phase 2 runtime
+after v2 upgrade. Beta7 runtime/plugin metadata reports
 `0.1.0-beta.7`; historical beta.5 reported `0.1.0`, so older builds still need
 `gmem growth --help` and provenance checks. See the [upgrade guide](docs/phase-2-beta-upgrade.md)
 and [native build guide](docs/binary-build.md).
-
-Cloud conflict strategy `both` keeps the remote version active at its canonical
-path and preserves exact local bytes as a portable `.conflict-YYYYMMDD-HHMMSS-local`
-archive. Archives retain original record IDs and are excluded from active growth
-counts, concept lists and assessments. Nested archives remain inspectable/portable;
-a canonical ID that itself looks like an archive name stays active when its full
-filename matches its payload. No feedback or capability event is fabricated.

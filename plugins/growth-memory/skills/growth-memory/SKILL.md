@@ -50,13 +50,6 @@ Run CLI commands in the background and only interrupt the user for:
 
 Never promote personal knowledge without explicit human approval.
 
-## User-Owned Remote Storage
-
-Growth Memory uses user-owned remote storage for cloud sync. Before a first
-cloud backup or sync, an agent may run `gmem cloud remote check` to validate a
-filesystem/NAS or S3/R2 remote without writing knowledge data. Never ask the
-user to paste storage credentials into chat or repeat them in a response.
-
 ## Task Lifecycle
 
 At the start of non-trivial work:

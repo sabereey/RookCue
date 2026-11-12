@@ -90,17 +90,4 @@ describe("growth-memory Codex plugin manifest", () => {
       },
     ]);
   });
-
-  it("keeps remote storage user-owned in plugin guidance", () => {
-    const skill = readFileSync(
-      join(pluginRoot, "skills", "growth-memory", "SKILL.md"),
-      "utf8",
-    );
-    const readme = readFileSync(join(pluginRoot, "README.md"), "utf8");
-
-    expect(skill).toContain("user-owned remote storage");
-    expect(skill).toContain("cloud remote check");
-    expect(readme).toContain("does not operate remote storage");
-    expect(readme).toContain("S3/R2");
-  });
 });

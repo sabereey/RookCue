@@ -102,19 +102,6 @@ gmem init --project "$PWD" --personal "$HOME/.growth-memory" --json
 If `gmem` is unavailable, continue the user's task normally and mention the
 missing runtime only when memory behavior is relevant to the request.
 
-## 3.1 User-Owned Remote Sync
-
-RookCue does not operate remote storage. When a user wants cloud sync,
-agents may recommend a preflight before the first backup or sync:
-
-```bash
-gmem cloud remote check --project "$PWD" --personal "$HOME/.growth-memory" --remote "<filesystem-path-or-s3-target>" --json
-```
-
-The user owns the filesystem/NAS or S3/R2 account. Never ask them to paste
-storage credentials into chat, store credentials in project memory, or repeat
-credentials in summaries. The preflight itself must not upload knowledge data.
-
 ## 4. When To Use It
 
 Use RookCue for:
@@ -386,8 +373,8 @@ Next time a task touches <topic>, I can bring this principle back automatically.
 The user should feel that review produced a durable asset, not that they filled
 out a form.
 
-Personal Pro Foundation commands are local-only foundations for future cloud
-features:
+These commands export and verify local personal knowledge, preview imports, and
+show search results, timelines, and digests:
 
 ```bash
 gmem personal export --project "$PWD" --personal "$HOME/.growth-memory" --out "$OUT_DIR" --json
@@ -399,23 +386,6 @@ gmem knowledge digest --project "$PWD" --personal "$HOME/.growth-memory" --json
 ```
 
 Agents must not run `personal import` without `--dry-run` in this phase.
-
-Cloud MVP commands use a local filesystem remote adapter. Prefer dry-run first,
-and never run restore/sync without `--dry-run` in this phase:
-
-```bash
-gmem cloud status --project "$PWD" --personal "$HOME/.growth-memory" --remote "$REMOTE_DIR" --json
-gmem cloud backup --project "$PWD" --personal "$HOME/.growth-memory" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --dry-run --json
-gmem cloud backup --project "$PWD" --personal "$HOME/.growth-memory" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --json
-gmem cloud restore --project "$PWD" --personal "$HOME/.growth-memory" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --dry-run --json
-gmem cloud sync --project "$PWD" --personal "$HOME/.growth-memory" --remote "$REMOTE_DIR" --passphrase "$PASSPHRASE" --dry-run --json
-```
-
-Agents may also provide the passphrase via `GROWTH_MEMORY_CLOUD_PASSPHRASE`.
-After successful backup, the personal root keeps a local cloud sync state.
-Agents should treat `conflicts` as a hard stop: growth-memory compares the last
-synced `base` hash with current `local` and `remote` hashes, and backup must not
-overwrite a remote object when both sides diverged.
 
 ## 9. Capability Updates
 
@@ -529,5 +499,4 @@ settings automatically. Inspect pending sessions and resume their recorded
 operations. Archive-current recovery is an explicit decision, not a merge.
 For expired certificates, renew both with the same keys, refresh mutual trust,
 restart normal serving, then resume without clearing baseline/journals.
-Do not use cloud storage as a substitute or count same-host fixtures as genuine
-two-device LAN evidence. Sync never grants human knowledge approval or mastery.
+Use two physical devices to verify LAN transfer. Sync never grants human knowledge approval or mastery.

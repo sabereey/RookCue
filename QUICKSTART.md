@@ -334,7 +334,7 @@ growth-memory knowledge provenance \
   --concept "$CONCEPT_ID"
 ```
 
-第一阶段 Personal Pro Foundation 还提供本地备份、搜索和时间线能力：
+也可以在本地导出和校验个人知识，并查看搜索结果、时间线和摘要：
 
 ```bash
 growth-memory personal export --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --out "$ROOT/export"
@@ -348,60 +348,6 @@ growth-memory knowledge digest --project "$PROJECT_ROOT" --personal "$PERSONAL_R
 `gmem peer` 支持局域网设备显式配对、预览和双向同步。参见 [局域网指南](docs/lan-direct-sync.md)。
 `verify` 会检查 manifest、文件大小和 SHA-256；`import --dry-run` 只预览新增/跳过，不覆盖任何个人数据。
 `search` 会解释命中原因，`timeline` 按沉淀时间展示，`digest` 会汇总最近知识、主题和较早知识。
-
-Cloud MVP 第一版使用本地 filesystem remote 来验证加密备份语义：
-
-```bash
-REMOTE_ROOT="$ROOT/cloud-remote"
-growth-memory cloud remote check --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_ROOT"
-growth-memory cloud backup --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_ROOT" --passphrase "demo-passphrase" --dry-run
-growth-memory cloud backup --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_ROOT" --passphrase "demo-passphrase"
-growth-memory cloud restore --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_ROOT" --passphrase "demo-passphrase" --dry-run
-growth-memory cloud sync --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_ROOT" --passphrase "demo-passphrase" --dry-run
-growth-memory cloud sync --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "$REMOTE_ROOT" --passphrase "demo-passphrase" --apply
-```
-
-先运行 `cloud remote check`，它只检查 connector 配置与安全能力，不上传知识。
-RookCue 不提供远端存储；你可以使用本地目录、挂载 NAS 或自己的 S3/R2
-账户。
-
-这一步会在 `REMOTE_ROOT` 下写入 encrypted objects 和 remote manifest；不会创建账号、不会访问外网。remote manifest 只保存 opaque object id、object key、encrypted digest、size 和加密元数据，不保存 `concepts/`、`reviews/`、`practice/` 这类明文路径，也不保存 plaintext source SHA-256。成功 backup 后，本地个人根目录会记录 cloud sync state；路径、明文 hash 和内容元数据只保留在本地 state 或加密 object envelope 中。后续用 `base`、`local`、解密后的 `remote` 三方 hash 判断一致性：单边本地变化可以上传，双边分叉会进入 conflicts，backup/sync 不会静默覆盖远端。`cloud sync --dry-run` 会计算同步计划，`cloud sync --apply` 会重新计算计划并且只在无冲突时执行；restore 当前仍只做 dry-run。
-
-### Conflict recovery
-
-当本地和远端都相对上次 sync base 发生变化时，`cloud sync --apply` 会停止。使用
-`cloud conflict list` 查看冲突，`cloud conflict show` 查看本地/远端摘要，再用
-`cloud conflict resolve --strategy local|remote|both|skip` 做显式选择。`remote`
-表示用远端覆盖本地，`local` 表示用本地覆盖远端，`both` 会保留两份，`skip`
-会暂时跳过。处理完成后重新执行 `cloud sync --apply`。
-
-### Cleanup and key loss
-
-`cloud cleanup --dry-run` reports encrypted remote objects no longer referenced
-by the remote manifest. `cloud cleanup --apply` deletes eligible filesystem
-remote orphans. `cloud sync --apply` can remove intentionally deleted paths from
-the remote manifest, but payload deletion remains a separate cleanup step. The
-passphrase is required to restore encrypted cloud content; if it is lost, use a
-trusted local personal root or a `personal export` bundle.
-
-S3-compatible BYO remote 使用同一套 encrypted object 和 opaque manifest 格式。通过环境变量配置凭证，不要把密钥放进 CLI 参数、项目文件、个人知识库、sync state 或 manifest：
-
-```bash
-GMEM_S3_ENDPOINT="https://<account>.r2.cloudflarestorage.com" \
-GMEM_S3_REGION="auto" \
-GMEM_S3_ACCESS_KEY_ID="..." \
-GMEM_S3_SECRET_ACCESS_KEY="..." \
-growth-memory cloud backup --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --remote "s3://bucket/growth-memory" --passphrase "demo-passphrase"
-```
-
-S3 provider 必须实际执行 `PutObject` 的 `If-None-Match: *`（首次创建）和
-`If-Match: <ETag>`（已有 manifest 更新）条件。并发修改返回
-`CLOUD_MANIFEST_REVISION_CONFLICT` 时，重新读取远端并执行 dry-run，再决定 apply；
-不要绕过条件写。缺少 ETag 返回 `CLOUD_MANIFEST_REVISION_REQUIRED`，provider 不支持
-条件请求时返回 `CLOUD_MANIFEST_CONDITIONAL_WRITE_UNSUPPORTED`，不会退回无条件覆盖。
-`cloud remote check` 仅报告配置和 connector 能力，不进行网络探测或认证 provider。
-S3 cleanup 暂不支持。上面的 S3 命令会访问你配置的存储服务；前面的本地目录
-示例不访问网络。
 
 ### 5.5 更新能力等级
 
