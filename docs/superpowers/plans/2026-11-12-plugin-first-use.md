@@ -25,7 +25,7 @@
 - [x] 2. Implement bundled launcher/setup with fixed source checksum, isolated install location, Node prerequisite bootstrap and clear JSON outcomes. Verify real fresh setup and retry.
 - [x] 3. Rewrite intent-specific Skill; add setup, recovery/search and review references; update plugin prompts and user docs. Pressure-test actual consuming agents, including ambiguous tasks and absent human answers.
 - [x] 4. Run a disposable CLI record → checkpoint/recover → human-input fixture review → exact approval → next-task search test. Do not manufacture a real human lesson or count the fixture as real-world adoption evidence.
-- [ ] 5. Run appropriate full tests/typecheck, fresh review, correct issues, commit and push under existing publication authorization. Verify remote commit.
+- [x] 5. Run appropriate full tests/typecheck, fresh review, correct issues, commit and push under existing publication authorization. Verify remote commit.
 
 ## Review focus
 
@@ -47,3 +47,5 @@
 - Full regression: 42 test files, 630 tests passed. TypeScript typecheck passed.
 - Local Codex plugin installed from this source marketplace; all 11 packaged files matched source. Previous private-beta plugin disabled (files retained) to prevent duplicate activation. Installed launcher detects the existing compatible rookcue command. A new conversation is needed to load the new Skill.
 - Ruling: retained beta.8 runtime/plugin identity and pinned the already published, unchanged CLI revision; only plugin packaging/behavior changed. The source installer preserves all source/license files. Public-directory submission and real-world adoption evidence remain outside this implementation.
+
+- Publication verified: implementation commit `a37622c3005bc595fa49243d79713fbe9585cc6e` was fast-forwarded to main and the GitHub remote reported the identical main SHA.
