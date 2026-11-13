@@ -2,129 +2,69 @@
 
 This guide is for Codex, Claude Code, Cursor, Windsurf, and other coding agents that should use RookCue as a background protocol.
 
-`rookcue` is the preferred agent runtime command. Detect it on `PATH`, then
-fall back to `gmem` or `growth-memory` for an existing installation. Use the
-available command in the examples below.
+For Codex, use the bundled [Skill](plugins/growth-memory/skills/growth-memory/SKILL.md)
+and its [setup protocol](plugins/growth-memory/skills/growth-memory/references/setup.md).
+The plugin contains an installer and launcher; a source checkout and global
+CLI installation are no longer prerequisites. Other hosts can use the same local
+launcher where Bash and the supported runtime are available; host integration
+must still be configured explicitly.
 
-Build and install `rookcue` from source using [the installation guide](README.md#install)
-before adding the plugin. Agents should detect the installed command on `PATH`.
-Keep credentials and personal storage paths out of task output.
+The agent runs commands and extracts IDs. Users express intent, confirm setup
+when needed, supply review answers, and approve exact knowledge candidates.
 
-The user should not have to run `rookcue` commands manually. Agents should call the CLI in the background and only interrupt the user for human judgment.
+## 1. Intent and authorization
 
-For the human-facing first run, see [QUICKSTART.md](QUICKSTART.md).
-For detailed architecture and module behavior, see [docs/project-documentation.md](docs/project-documentation.md).
+- Recording: an explicit request authorizes that task. If merely inferred, ask once.
+- Lookup: read-only search; no initialization or task creation.
+- Recovery: inspect existing context and checkpoints, resolve ambiguity, reuse the
+  identified task. Never complete an unrelated active task to clear the slot.
+- Review: obtain the actual review-level decision and human answers.
+- Promotion: show principle, boundary and evidence; require exact-content approval.
 
-## 1. Integration Goal
+Ordinary coding does not automatically authorize recording. A previously stated
+standing preference may do so, but silence does not. Never fabricate human answers
+or knowledge approval. Installation consent and task recording are separate scopes.
 
-Use RookCue automatically for non-trivial coding work so that AI-assisted tasks become recoverable project memory and, when useful, reviewed personal knowledge.
+## 2. Runtime setup
 
-The ideal user experience is:
-
-```text
-User asks for a task.
-Agent records task state in the background.
-Agent completes the work.
-Agent recommends skip/quick/deep review.
-User confirms, reconstructs, or approves knowledge only when needed.
-Agent writes project memory and personal knowledge in the background.
-```
-
-The user should see questions like:
-
-```text
-This task touched architecture and had heavy AI implementation. I recommend a deep review.
-Before I show the summary, please reconstruct what changed and why.
-```
-
-The user should not see instructions like:
-
-```text
-Run rookcue task start ...
-Run rookcue review advance ...
-Run rookcue knowledge promote ...
-```
-
-## 2. Global Codex Setup
-
-On this machine, Codex can read global instructions from:
-
-```text
-~/.codex/AGENTS.md
-```
-
-A useful global rule is:
-
-```md
-# Global RookCue Protocol
-
-For every non-trivial coding task, use the first available command on `PATH`
-in this order: `rookcue`, `gmem`, `growth-memory`.
-
-Use:
-
-- `--project` as the current repository root.
-- `--personal` as `~/.growth-memory`.
-
-Do not ask the user whether to enable RookCue every time.
-
-Initialize `rookcue` automatically when needed. Record task starts, important events, checkpoints, failures, decisions, and task completion in the background.
-
-After completing a task, recommend `skip`, `quick`, or `deep` review based on task signals.
-
-Only interrupt the user for human judgment:
-
-- Review level confirmation.
-- Reconstruction answers.
-- Knowledge approval or rejection.
-
-Never ask the user to manually run `rookcue` commands.
-
-Skip RookCue only for trivial Q&A, pure explanation, or explicitly temporary scratch work.
-```
-
-Project-specific `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, or other agent rule files can add local preferences, but global activation should live outside individual projects.
-
-## 3. Agent Startup Check
-
-At the start of a task, the agent should silently check:
-
-1. Is this a coding or project-work task?
-2. Is it non-trivial?
-3. Is `rookcue`, `gmem`, or `growth-memory` available on `PATH`?
-4. Is the current directory a reasonable project root?
-5. Is the user asking for temporary scratch work or pure explanation?
-
-If checks pass, initialize the memory roots:
+Resolve the installed Skill directory from the host. Run:
 
 ```bash
-rookcue init --project "$PWD" --personal "$HOME/.growth-memory" --json
+bash "$SKILL_DIR/scripts/rookcue.sh" check
 ```
 
-If all three commands are unavailable, continue the user's task normally and mention the
-missing runtime only when memory behavior is relevant to the request.
+If setup is needed, explain pinned source/dependency downloads, optional private
+Node, and the install directory, then request consent. After approval:
 
-## 4. When To Use It
+```bash
+bash "$SKILL_DIR/scripts/rookcue.sh" setup --approve-install
+bash "$SKILL_DIR/scripts/rookcue.sh" check
+```
 
-Use RookCue for:
+A `ready` result is required before use. The script prefers a compatible
+`rookcue`, `gmem`, or `growth-memory`, then its private runtime. It does not
+modify global links or shell profiles. Setup failures do not authorize bypasses.
 
-- Code changes.
-- Architecture or design decisions.
-- Debugging with meaningful findings.
-- Refactors.
-- Tests or build workflow changes.
-- New features.
-- Tasks where AI performed substantial implementation.
-- Tasks likely to produce reusable knowledge.
+## 3. Roots and invocation
 
-Skip it for:
+Use the current repository root for `--project` and `$HOME/.growth-memory` for
+`--personal`, unless the user already chose another location. Pass both explicitly
+where supported. In the examples below, `rookcue` abbreviates:
 
-- Simple Q&A.
-- Pure explanation with no project changes.
-- One-off shell checks.
-- Formatting or tiny copy edits.
-- Explicitly temporary experiments.
-- User requests that say not to record memory.
+```bash
+bash "$SKILL_DIR/scripts/rookcue.sh" run -- <CLI arguments>
+```
+
+Pass user text as literal arguments, use `--json`, and check `ok`. Only initialize
+roots for authorized recording, never for a read-only lookup/recovery request.
+
+## 4. Lookup and recovery before recording
+
+Follow the [lookup/recovery reference](plugins/growth-memory/skills/growth-memory/references/lookup-and-recovery.md).
+Search relevant approved experience at an authorized task's start and before a
+related decision. Show at most one relevant principle with source and boundary.
+No automatic match means no interruption; an explicit search gets an honest empty
+result. Inspect context before starting a task so recovery does not create duplicates.
 
 ## 5. Background Task Lifecycle
 
@@ -310,7 +250,7 @@ Supported templates are `five-whys`, `aar`, `kpt`, and `feynman`. Use them only 
 
 ## 8. Knowledge Promotion Flow
 
-After a completed review, run `knowledge propose` without `--candidate` first. The CLI auto-drafts a candidate from the latest human `transfer-answer` and the reviewed task evidence.
+After a completed deep review, `knowledge propose` can auto-draft from the human transfer answer. A quick review has no transfer phase: draft an explicit, evidence-backed candidate if useful, then obtain separate exact-content approval. See the [review reference](plugins/growth-memory/skills/growth-memory/references/review-and-approval.md).
 
 Use explicit `--candidate` JSON only when the agent needs to override the auto-draft with a better bounded principle.
 
@@ -369,7 +309,7 @@ After successful promotion, show the payoff immediately in human language:
 
 ```text
 Promoted 1 personal knowledge item.
-Next time a task touches <topic>, I can bring this principle back automatically.
+At a future authorized task involving <topic>, I can search for this principle and show it when its boundary fits.
 ```
 
 The user should feel that review produced a durable asset, not that they filled
@@ -448,9 +388,10 @@ Do not ask the user to:
 
 Before work:
 
-- Check `rookcue --help`.
-- Initialize roots.
-- Start task if appropriate.
+- Resolve intent and authorization.
+- Check the bundled launcher; install only after installation consent.
+- Inspect context and search relevant experience.
+- Initialize roots/start a task only for authorized recording.
 
 During work:
 

@@ -10,29 +10,31 @@ For a detailed design, architecture, module, feature, and usage walkthrough, see
 For current priorities and future milestones, see the [roadmap](docs/roadmap.md).
 
 The core and included Codex integration are available under [GPL-3.0-only](LICENSE).
-This is an early source release. Use the source installation below to try the
-CLI and Codex integration. The CLI provides `rookcue`, the short command `gmem`, and the compatibility alias
-`growth-memory`.
+This is an early source release. For normal use, install the Codex plugin and
+ask it in natural language. The CLI remains available for developers and scripts.
 
 ## Codex Plugin
 
-This repository includes a local Codex plugin source at `plugins/growth-memory/`.
+The plugin is the main conversational entry point. After installing it, say:
 
-The plugin is the agent-native experience layer for `rookcue`: it teaches Codex when to record task state, how to recommend lightweight reviews, and how to promote personal knowledge only after human approval.
+- “用 RookCue 记录这次任务。” / “Record this task with RookCue.”
+- “继续上次任务。” / “Continue my previous task.”
+- “找找以前有没有类似问题。” / “Find relevant experience.”
+- “复盘一下，把值得保留的经验给我确认。” / “Review this task.”
 
-The plugin does not replace CLI installation. Build and link the CLI first:
+The agent checks the runtime and, if needed, asks permission to prepare it in
+`~/.local/share/rookcue`. You do not need to remember CLI commands or run
+`npm link` for plugin use. It can prepare a private Node runtime on macOS arm64
+and Linux x64 when Node/npm are absent. Downloads are pinned and checked.
 
-```bash
-npm ci
-npm run build
-npm link
-```
+Task recording is opt-in. An explicit recording request authorizes that task;
+an inferred suggestion needs confirmation. Lookup/recovery reads existing data.
+Saving personal knowledge always requires approval of the exact proposed lesson.
+Skill activation depends on the host's intent matching; select RookCue explicitly
+if it is not picked up automatically.
 
-Then validate the plugin:
-
-```bash
-npm test -- tests/plugin/growth-memory-plugin.test.ts
-```
+See the [plugin installation guide](plugins/growth-memory/README.md). This is a
+source-distributed plugin; it is not a claim of public plugin-directory listing.
 
 ## Requirements
 
@@ -40,6 +42,9 @@ npm test -- tests/plugin/growth-memory-plugin.test.ts
 - npm
 
 ## Install
+
+The following is the optional standalone CLI/developer installation. Plugin users
+can use the agent-managed setup above.
 
 ```bash
 npm ci

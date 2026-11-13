@@ -1,7 +1,7 @@
 {
   "name": "growth-memory",
   "version": "0.1.0-beta.8",
-  "description": "A local-first Codex plugin that helps agents use rookcue for task recovery, review, and personal knowledge promotion.",
+  "description": "A local-first RookCue plugin for recording tasks, recovering work, finding experience and human-approved reviews, with agent-managed runtime setup.",
   "author": {
     "name": "Growth Memory"
   },
@@ -17,7 +17,7 @@
   "interface": {
     "displayName": "RookCue",
     "shortDescription": "Turn AI-assisted work into recoverable project memory and reviewed personal knowledge.",
-    "longDescription": "RookCue teaches Codex to use the local rookcue CLI as a background protocol for non-trivial coding work. It records task progress, recommends lightweight reviews, and promotes personal knowledge only after human approval.",
+    "longDescription": "Use natural language to record a task, recover previous work, find approved experience, or review a completed task. The agent checks the local runtime and prepares it after installation consent. Personal knowledge requires approval of the exact candidate.",
     "developerName": "RookCue",
     "category": "Productivity",
     "capabilities": [
@@ -25,9 +25,9 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Use rookcue for this coding task.",
-      "Show my promoted personal knowledge.",
-      "Recommend a lightweight review for this task."
+      "用 RookCue 记录这次任务。",
+      "找找以前有没有类似问题的经验。",
+      "复盘这次任务，先让我确认要保存的经验。"
     ]
   }
 }

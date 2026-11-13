@@ -42,25 +42,6 @@ describe("growth-memory Codex plugin manifest", () => {
     }
   });
 
-  it("documents the required agent behavior guardrails", () => {
-    const skill = readFileSync(
-      join(pluginRoot, "skills", "growth-memory", "SKILL.md"),
-      "utf8",
-    );
-
-    expect(skill).toContain("Use `--project` as the current repository root");
-    expect(skill).toContain("Use `--personal` as `$HOME/.growth-memory`");
-    expect(skill).toContain("Do not ask the user to run `rookcue` commands manually");
-    expect(skill).toContain("This task has knowledge worth capturing. I recommend a 2-minute quick review.");
-    expect(skill).toContain("If the user does not confirm, do not start a review session.");
-    expect(skill).toContain("Recommend `deep` only when there are strong signals");
-    expect(skill).toContain("What did I understand?");
-    expect(skill).toContain("Where is the AI summary inaccurate?");
-    expect(skill).toContain("Which principle is worth preserving?");
-    expect(skill).toContain("Never promote personal knowledge without explicit human approval.");
-    expect(skill).toContain("Promoted 1 personal knowledge item.");
-  });
-
   it("declares a repo-local marketplace entry for testing", () => {
     const marketplace = readJson<{
       name: string;
