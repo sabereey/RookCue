@@ -1,5 +1,53 @@
 # First-use runtime setup
 
+## Install once for local agents
+
+For installation across local agents, resolve `SKILL_DIR` to the complete skill
+folder from the downloaded repository or installed plugin. Inspect with
+`bash "$SKILL_DIR/scripts/rookcue.sh" agents`. Explain the detected host connections
+and runtime downloads together. An existing installation request covering this
+scope is sufficient authorization; proceed without repeating the question.
+
+```bash
+bash "$SKILL_DIR/scripts/rookcue.sh" install --approve-install
+```
+
+This prepares one runtime and connects detected Codex, Grok and Claude Code hosts
+on macOS/Linux. Optional `--agents codex,grok,claude` selects hosts explicitly.
+The shared skill contains scripts and references and survives deletion of the
+source checkout. A custom `ROOKCUE_RUNTIME_HOME` is recorded in the shared copy.
+`install` also accepts setup's `--archive` and `--offline` options.
+
+Use `connect` to attach a newly installed host; it needs Node >=22.12 or the
+private Node prepared by `install`. Use `install` from a new skill release to
+upgrade the runtime and publish the shared skill together. Connected hosts load
+the new revision in a new session.
+When using fresh source for an existing shared installation, read its installed
+`scripts/runtime-home` and supply that value as `ROOKCUE_RUNTIME_HOME` to the new
+launcher. This preserves custom locations during upgrades and host connections.
+
+```bash
+bash "$SKILL_DIR/scripts/rookcue.sh" connect
+bash "$SKILL_DIR/scripts/rookcue.sh" agents
+```
+
+Inspect `ok` and each `data.agents` entry. `connected` confirms filesystem wiring;
+invoke `growth-memory` in a new host session to verify loading. `plugin-managed`
+means Codex already has an enabled RookCue plugin with its own update lifecycle.
+To migrate fully, disable that plugin in Codex and rerun `connect --agents codex`.
+`conflict` preserves an existing entry and reports its path for reconciliation.
+Other hosts may already be connected when the result is `needs-attention`.
+After a killed installer, inspect `agents.lock/owner.json` and its PID before
+removing a stale lock. Normal errors release the lock.
+
+Use the same personal root across hosts. When switching agents within a task,
+read the same project's context/checkpoint and reuse its task ID. Independent work
+in the same project must resolve the active-task choice first. Separate worktrees
+have separate project records and can share the personal root. Cloud sandboxes
+and other computers require their own runtime and data access or synchronization.
+
+## Prepare the runtime for an existing skill
+
 The plugin includes its launcher and installer. It works from a copied plugin;
 the source checkout and global `npm link` are not required. Its runtime pin is
 in `../scripts/runtime.json`. Plugin identity `growth-memory` is retained for

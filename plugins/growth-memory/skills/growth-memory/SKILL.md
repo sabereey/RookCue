@@ -10,6 +10,10 @@ Do not ask the user to run `rookcue` commands manually.
 
 ## Choose the intent before doing anything
 
+For installation, updates, or connecting another local agent, follow the shared
+installation section in [setup](references/setup.md). One setup can connect
+Codex, Grok and Claude Code. Installation intent is separate from task recording.
+
 | Intent | First action | Write authorization |
 | --- | --- | --- |
 | Record this task / 用 RookCue 记录 | Explain the scope: task progress in this project, no automatic personal knowledge | An explicit recording request authorizes this task. If only inferred, ask once and wait. |

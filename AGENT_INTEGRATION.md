@@ -2,7 +2,7 @@
 
 This guide is for Codex, Claude Code, Cursor, Windsurf, and other coding agents that should use RookCue as a background protocol.
 
-For Codex, use the bundled [Skill](plugins/growth-memory/skills/growth-memory/SKILL.md)
+Use the bundled [Skill](plugins/growth-memory/skills/growth-memory/SKILL.md)
 and its [setup protocol](plugins/growth-memory/skills/growth-memory/references/setup.md).
 The plugin contains an installer and launcher; a source checkout and global
 CLI installation are no longer prerequisites. Other hosts can use the same local
@@ -26,6 +26,16 @@ standing preference may do so, but silence does not. Never fabricate human answe
 or knowledge approval. Installation consent and task recording are separate scopes.
 
 ## 2. Runtime setup
+
+For a multi-agent installation, inspect `rookcue.sh agents`, then execute
+`rookcue.sh install --approve-install` under the user's installation authorization.
+Optional `--agents codex,grok,claude` selects hosts explicitly. The shared installer
+supports macOS/Linux. `rookcue.sh connect` attaches newly detected hosts;
+`rookcue.sh agents` inspects filesystem connections without writes.
+Use `install` from a new release to upgrade runtime and shared skill together.
+Existing Codex plugins are `plugin-managed`; disable the old plugin in Codex
+before migrating that host to the shared skill. Verify actual skill loading
+in a new host session separately from filesystem connection checks.
 
 Resolve the installed Skill directory from the host. Run:
 

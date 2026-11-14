@@ -1,26 +1,42 @@
 # RookCue
 
+English | [简体中文](README_CN.md)
+
 RookCue is a local-first personal experience library for working with AI
 agents. The current CLI records project evidence, supports reviews and saves
 approved lessons for reuse across projects.
 
 For an agent-guided first run, see [`QUICKSTART.md`](QUICKSTART.md).
+For agent installation entry points, see [`llms.txt`](llms.txt).
 For agent integration instructions, see [`AGENT_INTEGRATION.md`](AGENT_INTEGRATION.md).
-For a detailed design, architecture, module, feature, and usage walkthrough, see [`docs/project-documentation.md`](docs/project-documentation.md).
-For current priorities and future milestones, see the [roadmap](docs/roadmap.md).
+For a detailed design, architecture, module, feature, and usage walkthrough, see the [project documentation (Chinese)](docs/project-documentation.md).
+For current priorities and future milestones, see the [roadmap (Chinese)](docs/roadmap.md).
 
 The core and included Codex integration are available under [GPL-3.0-only](LICENSE).
-This is an early source release. For normal use, install the Codex plugin and
-ask it in natural language. The CLI remains available for developers and scripts.
+This is an early source release. For normal use, ask your local agent to install
+RookCue once for your supported agents, then use natural language. The CLI remains
+available for developers and scripts.
 
-## Codex Plugin
+## Install for multiple agents
 
-The plugin is the main conversational entry point. After installing it, say:
+Tell your agent:
 
-- “用 RookCue 记录这次任务。” / “Record this task with RookCue.”
-- “继续上次任务。” / “Continue my previous task.”
-- “找找以前有没有类似问题。” / “Find relevant experience.”
-- “复盘一下，把值得保留的经验给我确认。” / “Review this task.”
+> Install RookCue from https://github.com/sabereey/RookCue for the Codex, Grok, and Claude Code agents already on this computer, using a shared knowledge library.
+
+The shared installer detects local Codex, Grok and Claude Code hosts and connects
+them to one skill copy and runtime on macOS/Linux. Updates switch the shared skill
+atomically; newly installed hosts can be connected later. Existing Codex plugins
+remain host-managed until migrated. See the [installation guide](plugins/growth-memory/README.md).
+
+## Conversational use and the Codex plugin
+
+The shared skill is the conversational entry point for supported agents. The
+Codex plugin is also available as a host-managed installation. After setup, say:
+
+- “Record this task with RookCue.”
+- “Continue my previous task.”
+- “Find relevant experience.”
+- “Review this task and show me the lessons worth keeping for approval.”
 
 The agent checks the runtime and, if needed, asks permission to prepare it in
 `~/.local/share/rookcue`. You do not need to remember CLI commands or run
@@ -172,7 +188,7 @@ files would be added or skipped; it does not overwrite data in this phase.
 recurring themes, and oldest concepts.
 
 `rookcue peer` syncs personal knowledge directly between paired devices on the same
-LAN. Each sync is manually triggered. See the [LAN guide](docs/lan-direct-sync.md)
+LAN. Each sync is manually triggered. See the [LAN guide (Chinese)](docs/lan-direct-sync.md)
 for pairing, preview, conflicts and recovery.
 
 ## Review recommendations
@@ -236,9 +252,12 @@ Project and personal mutations use per-root cross-process locks. Task/current/ev
 
 ## Help-verified command surface
 
-These are the top-level command groups shown by `rookcue --help`:
+Common top-level commands and groups are listed below. Run `rookcue --help` for the full inventory:
 
 - `init`
+- `status`
+- `growth`
+- `peer`
 - `task`
 - `context`
 - `personal`

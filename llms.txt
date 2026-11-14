@@ -1,0 +1,33 @@
+# RookCue
+
+> Local-first personal experience library for AI-assisted work. Record project evidence, recover progress, review completed tasks and reuse human-approved lessons across projects and agents.
+
+Repository: https://github.com/sabereey/RookCue
+English guide: https://github.com/sabereey/RookCue/blob/main/README.md
+Chinese guide: https://github.com/sabereey/RookCue/blob/main/README_CN.md
+
+## Install for the user
+
+1. Obtain the complete repository or a complete skill package from the source the user selected. The shared installer is in `plugins/growth-memory/skills/growth-memory/scripts/rookcue.sh`. Its sibling scripts and references must be present. Use an absolute `SKILL_DIR` pointing to that skill folder.
+2. Read `SKILL_DIR/SKILL.md` and `SKILL_DIR/references/setup.md`. Explain the local agent connections and any runtime downloads in the user's language. Reuse installation authorization already covering that scope.
+3. When compatible Node is available, inspect hosts with `bash "$SKILL_DIR/scripts/rookcue.sh" agents`. If Node is missing, the shared install command can prepare private Node on macOS arm64 and Linux x64.
+4. Run `bash "$SKILL_DIR/scripts/rookcue.sh" install --approve-install`. It connects detected Codex, Grok and Claude Code hosts on macOS/Linux. Add `--agents codex,grok,claude`, or a subset, when the user has selected hosts explicitly.
+5. Inspect the exit status, JSON `ok` and each `data.agents` result. `connected` confirms filesystem wiring. `plugin-managed` means an existing Codex plugin retains its own update lifecycle. `needs-attention` may include successful connections alongside conflicts; report the specific remaining paths and actions.
+6. Verify the runtime with `bash "$SKILL_DIR/scripts/rookcue.sh" check` and `bash "$SKILL_DIR/scripts/rookcue.sh" run -- --version`. Start a new host session and invoke `growth-memory` to verify actual loading. Report filesystem checks and live-host verification accurately.
+
+The default shared runtime and skill storage is `~/.local/share/rookcue`; `ROOKCUE_RUNTIME_HOME` selects a custom location. Source setup needs Node >=22.12.0 and npm, with a pinned private Node bootstrap available on the platforms above. Full prerequisites and recovery steps are in the setup reference.
+
+## Continue using the installation
+
+- Use the installed skill's launcher. `agents` inspects connections and `connect` attaches newly detected hosts. Before updating from fresh source, read `scripts/runtime-home` from the currently installed shared skill and carry that path forward as the `ROOKCUE_RUNTIME_HOME` environment variable. Then run `install --approve-install` from the newly obtained release. Use the same root when connecting another host from fresh source; fresh packages otherwise use the default location.
+- Keep all local agents on the user's chosen personal root, normally `~/.growth-memory`. To continue a task in another agent, use the same project and read its existing context and checkpoint before writing.
+- Follow the user's recording authorization. Reviews use actual human answers, and saving a proposed lesson requires approval of its exact principle, boundary and evidence. Installation prepares software; memory initialization follows the recording workflow.
+- Supported shared installation targets are local Codex, Grok and Claude Code on macOS/Linux. Other hosts require adapters. Cloud environments and other computers require their own runtime and explicit data access or synchronization.
+
+## Further reading
+
+- Installation guide: https://github.com/sabereey/RookCue/blob/main/plugins/growth-memory/README.md
+- Chinese installation guide: https://github.com/sabereey/RookCue/blob/main/plugins/growth-memory/README_CN.md
+- Quickstart: https://github.com/sabereey/RookCue/blob/main/QUICKSTART.md
+- Chinese quickstart: https://github.com/sabereey/RookCue/blob/main/QUICKSTART_CN.md
+- Agent protocol: https://github.com/sabereey/RookCue/blob/main/AGENT_INTEGRATION.md

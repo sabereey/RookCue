@@ -4,9 +4,14 @@ import { constants } from "node:fs";
 import { access, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { delimiter, dirname, isAbsolute, join, resolve } from "node:path";
+import { configureAgents } from "./agents.mjs";
 
 const manifest = JSON.parse(await readFile(new URL("./runtime.json", import.meta.url), "utf8"));
-const home = resolve(process.env.ROOKCUE_RUNTIME_HOME || join(homedir(), ".local/share/rookcue"));
+const installedHome = await readFile(new URL("./runtime-home", import.meta.url), "utf8").catch(error => {
+  if (error.code === "ENOENT") return "";
+  throw error;
+});
+const home = resolve(process.env.ROOKCUE_RUNTIME_HOME || installedHome.trim() || join(homedir(), ".local/share/rookcue"));
 const target = join(home, "runtimes", manifest.sourceCommit);
 const childEnv = { ...process.env, PATH: `${dirname(process.execPath)}${delimiter}${process.env.PATH || ""}` };
 const fail = (code, message) => Object.assign(new Error(message), { code });
@@ -145,7 +150,12 @@ async function install(options) {
 
 try {
   const [action, ...args] = process.argv.slice(2);
-  if (action === "check") {
+  if (action === "agents" || action === "connect") {
+    const data = await configureAgents(action, args, home);
+    const ok = !["needs-attention", "no-agents"].includes(data.status);
+    json({ ok, data, ...(!ok ? { error: { code: "AGENT_SETUP_INCOMPLETE", message: data.detail || "Some agents need attention; see data.agents." } } : {}) });
+    if (!ok) process.exitCode = 1;
+  } else if (action === "check") {
     if (args.length) throw fail("INVALID_ARGUMENT", "check takes no arguments.");
     const runtime = await discover();
     json({ ok: true, data: runtime ? { status: "ready", runtime } : { status: "setup-required", version: manifest.version, source: manifest.sourceUrl, installRoot: home } });
@@ -166,7 +176,7 @@ try {
     const result = spawnSync(runtime.executable, [...runtime.args, ...args.slice(1)], { env: childEnv, stdio: "inherit" });
     if (result.error) throw result.error;
     process.exitCode = result.status ?? 1;
-  } else throw fail("INVALID_ARGUMENT", "Expected check, setup, or run.");
+  } else throw fail("INVALID_ARGUMENT", "Expected check, setup, agents, connect, or run.");
 } catch (error) {
   json({ ok: false, error: { code: error.code || "SETUP_FAILED", message: error.message } });
   process.exitCode = 1;

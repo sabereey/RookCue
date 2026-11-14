@@ -2,7 +2,9 @@
 # Interpreter entry point: package installers may strip executable bits.
 set -eu
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-runtime_home=${ROOKCUE_RUNTIME_HOME:-"$HOME/.local/share/rookcue"}
+installed_home=''
+if [ -f "$script_dir/runtime-home" ]; then IFS= read -r installed_home < "$script_dir/runtime-home"; fi
+runtime_home=${ROOKCUE_RUNTIME_HOME:-${installed_home:-"$HOME/.local/share/rookcue"}}
 node_dir="$runtime_home/node-v24.12.0"
 action=${1:-}
 error() { printf '{"ok":false,"error":{"code":"%s","message":"%s"}}\n' "$1" "$2"; exit 1; }
@@ -21,11 +23,48 @@ validate_setup() {
   done
   $approved || error INSTALL_APPROVAL_REQUIRED 'Explain the downloads and install location and obtain user consent before setup.'
 }
+validate_agents() {
+  [ "$#" -eq 0 ] && return
+  [ "$#" -eq 2 ] && [ "$1" = --agents ] || error INVALID_ARGUMENT 'Use --agents auto or comma-separated codex,grok,claude.'
+  [ "$2" = auto ] && return
+  case "$2" in ''|,*|*,|*,,*) error INVALID_ARGUMENT 'Agent selection contains an empty name.' ;; esac
+  remaining="$2"
+  while [ -n "$remaining" ]; do
+    agent=${remaining%%,*}
+    case "$agent" in codex|grok|claude) ;; *) error INVALID_ARGUMENT 'Supported agents are codex, grok, and claude.' ;; esac
+    case "$remaining" in *,*) remaining=${remaining#*,} ;; *) remaining='' ;; esac
+  done
+}
+if [ "$action" = install ]; then
+  shift
+  setup_args=()
+  agent_args=(--agents auto)
+  agents_selected=false
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --approve-install|--offline) setup_args+=("$1") ;;
+      --archive) [ "$#" -ge 2 ] || error INVALID_ARGUMENT 'Missing archive path.'; setup_args+=("$1" "$2"); shift ;;
+      --agents) [ "$#" -ge 2 ] && ! $agents_selected || error INVALID_ARGUMENT 'Specify --agents once with a value.'; agent_args=("$1" "$2"); agents_selected=true; shift ;;
+      *) error INVALID_ARGUMENT 'Use install --approve-install [--agents auto|codex,grok,claude] [--archive PATH] [--offline].' ;;
+    esac
+    shift
+  done
+  validate_setup setup ${setup_args[@]+"${setup_args[@]}"}
+  validate_agents "${agent_args[@]}"
+  if setup_result=$(ROOKCUE_CONNECT_AFTER_SETUP=1 bash "$script_dir/rookcue.sh" setup "${setup_args[@]}"); then
+    exec bash "$script_dir/rookcue.sh" connect "${agent_args[@]}"
+  else
+    printf '%s\n' "$setup_result"
+    exit 1
+  fi
+fi
 case "$action" in
   check) [ "$#" -eq 1 ] || error INVALID_ARGUMENT 'check takes no arguments.' ;;
+  agents) [ "$#" -eq 1 ] || error INVALID_ARGUMENT 'agents takes no arguments.' ;;
+  connect) validate_agents "${@:2}" ;;
   setup) validate_setup "$@" ;;
   run) [ "$#" -ge 3 ] && [ "$2" = -- ] || error INVALID_ARGUMENT 'Use run -- followed by CLI arguments.' ;;
-  *) error INVALID_ARGUMENT 'Expected check, setup, or run.' ;;
+  *) error INVALID_ARGUMENT 'Expected check, setup, install, agents, connect, or run.' ;;
 esac
 
 node_bin=$(command -v node || true)
@@ -33,7 +72,7 @@ usable_node() { [ -n "$1" ] && "$1" -e 'const [a,b]=process.versions.node.split(
 if ! usable_node "$node_bin"; then node_bin="$node_dir/bin/node"; fi
 
 # A self-contained native CLI can work even when no JavaScript runtime exists.
-if ! usable_node "$node_bin"; then
+if ! usable_node "$node_bin" && [ "${ROOKCUE_CONNECT_AFTER_SETUP:-0}" != 1 ]; then
   for name in rookcue gmem growth-memory; do
     candidate=$(command -v "$name" || true)
     case "$candidate" in /*) ;; *) continue ;; esac

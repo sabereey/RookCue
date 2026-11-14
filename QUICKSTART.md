@@ -1,30 +1,36 @@
-# RookCue 快速上手
+# RookCue Quickstart
 
-日常使用建议从 [Codex 插件](plugins/growth-memory/README.md) 开始。
-安装一次插件后，直接对 Agent 说：
+[English](QUICKSTART.md) | [简体中文](QUICKSTART_CN.md)
 
-> 用 RookCue 记录这次任务。
+First, tell your local agent: “Install RookCue from https://github.com/sabereey/RookCue, connect the existing Codex, Grok, and Claude Code on this computer, and share one knowledge base.”
+The agent will detect existing hosts and complete a shared installation. See the [installation guide](plugins/growth-memory/README.md).
+After installation, tell any connected agent:
 
-首次缺少运行环境时，Agent 会说明下载来源和安装位置，得到你的确认后完成配置。
-后续任务记录由 Agent 执行，不需要记住 `rookcue`、`gmem` 或任何参数。
+> Use RookCue to record this task.
 
-| 你想做什么 | 可以这样说 |
+If the runtime is missing on first use, the agent will explain the download source and installation location, then finish setup after your confirmation.
+The agent handles subsequent task recording; you do not need to remember `rookcue`, `gmem`, or any flags.
+When adding an agent, say “Connect the newly installed agent to RookCue.” When switching agents within the same project,
+the agent first reads existing tasks and checkpoints. Existing Codex plugins remain managed by Codex; see the installation guide for the complete migration procedure.
+
+| What you want to do | What you can say |
 | --- | --- |
-| 记录当前工作 | 用 RookCue 记录这次任务 |
-| 找回进度 | 继续上次任务 |
-| 查询旧经验 | 找找以前有没有类似问题 |
-| 复盘并保存经验 | 复盘一下，把候选经验给我确认 |
+| Record current work | Use RookCue to record this task |
+| Resume progress | Continue the previous task |
+| Find past lessons | Look for similar problems we have encountered before |
+| Review and save lessons | Review this task and show me the candidate lessons for approval |
 
-同一任务授权后，不会逐条命令重复询问。复盘需要你的真实回答，保存经验前会展示
-具体原则、适用边界和证据，再由你批准。普通开发请求不会默认开启记录。
-若宿主没有自动识别意图，可以显式选择 RookCue 插件或其 `growth-memory` Skill。
+Once you authorize recording for a task, the agent will not ask again for every command. Reviews require your actual responses. Before saving a lesson,
+the agent shows the specific principle, applicability boundary, and evidence for your approval. Ordinary development requests do not enable recording by default.
+If the host does not recognize your intent automatically, explicitly select the RookCue plugin or its `growth-memory` skill.
 
-以下是供开发者检查底层行为的 CLI 演示。插件用户无需手动执行。
-三个命令 `rookcue`、`gmem`、`growth-memory` 指向同一个 CLI。
+The following CLI demo lets developers inspect the underlying behavior. Plugin users do not need to run it manually.
+The three commands `rookcue`, `gmem`, and `growth-memory` all invoke the same CLI.
+The human answers and approval below are demo fixtures for the temporary roots only. In real work, use the user's actual responses, show the exact candidate principle, boundary, and evidence, and obtain explicit approval of that candidate before recording a human decision.
 
-## 1. 安装
+## 1. Install
 
-在项目根目录执行：
+Run from the project root:
 
 ```bash
 npm ci
@@ -32,7 +38,7 @@ npm run build
 npm link
 ```
 
-确认命令可用：
+Confirm that the commands are available:
 
 ```bash
 rookcue --help
@@ -40,17 +46,17 @@ gmem --help
 growth-memory --help
 ```
 
-如果你本机没有其它 `gm` 命令，可以自行设置 `alias gm=rookcue`。`gm`
-不是默认安装命令，避免和其它工具或个人 alias 冲突。
+If your machine has no other `gm` command, you may set `alias gm=rookcue` yourself. `gm`
+is not installed by default, to avoid conflicts with other tools or personal aliases.
 
-## 2. 准备演示目录
+## 2. Prepare demo directories
 
-这个系统同时维护两类资产：
+The system maintains two kinds of assets:
 
-- 项目资产：当前项目的任务、事件、checkpoint、review、evolution
-- 个人资产：跨项目的个人知识、审批记录、能力等级
+- Project assets: tasks, events, checkpoints, reviews, and evolutions for the current project
+- Personal assets: knowledge, approval records, and capability levels across projects
 
-先准备一组临时目录：
+Prepare temporary directories:
 
 ```bash
 ROOT="$(mktemp -d /tmp/growth-memory-demo.XXXXXX)"
@@ -58,7 +64,7 @@ PROJECT_ROOT="$ROOT/project"
 PERSONAL_ROOT="$ROOT/personal"
 ```
 
-后面会多次从 JSON 输出里取 `id`。为了少写重复命令，可以先定义一个小 helper：
+Later steps extract `id` from JSON output repeatedly. Define a small helper to avoid repeating commands:
 
 ```bash
 gm_id() {
@@ -66,30 +72,30 @@ gm_id() {
 }
 ```
 
-初始化：
+Initialize:
 
 ```bash
 rookcue init --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
 ```
 
-初始化后会得到两套文件系统：
+Initialization creates two filesystem locations:
 
 ```text
 $PROJECT_ROOT/.growth-memory/
 $PERSONAL_ROOT/
 ```
 
-可以用一条命令确认当前状态：
+Check the current status with one command:
 
 ```bash
 rookcue status --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
 ```
 
-## 3. 3 分钟最小体验
+## 3. A minimal three-minute walkthrough
 
-这一步只验证一件事：`rookcue` 可以开始记录项目现场。
+This step verifies one thing: `rookcue` can start recording project context.
 
-### 3.1 开始任务
+### 3.1 Start a task
 
 ```bash
 TASK_JSON="$(rookcue task start \
@@ -101,7 +107,7 @@ TASK_JSON="$(rookcue task start \
 TASK_ID="$(gm_id "$TASK_JSON")"
 ```
 
-### 3.2 记录一个事件
+### 3.2 Record an event
 
 ```bash
 EVENT_JSON="$(rookcue task event \
@@ -115,25 +121,25 @@ EVENT_JSON="$(rookcue task event \
 EVENT_ID="$(gm_id "$EVENT_JSON")"
 ```
 
-### 3.3 查看当前上下文
+### 3.3 View the current context
 
 ```bash
 rookcue context show --project "$PROJECT_ROOT" --json
 ```
 
-这时你已经能看到项目工作现场。也可以直接看文件：
+You can now see the project working context. You can also inspect the files directly:
 
 ```bash
 find "$PROJECT_ROOT/.growth-memory" -maxdepth 3 -type f | sort
 ```
 
-如果你只想确认工具能不能工作，到这里就够了。
+If you only want to confirm that the tool works, you can stop here.
 
-## 4. 完整复盘闭环
+## 4. Complete the review cycle
 
-接下来继续用同一个 `TASK_ID`，把一次任务推进到 deep review。
+Continue with the same `TASK_ID` to take the task through a deep review.
 
-### 4.1 记录 checkpoint
+### 4.1 Record a checkpoint
 
 ```bash
 CHECKPOINT_JSON="$(rookcue task checkpoint \
@@ -146,7 +152,7 @@ CHECKPOINT_JSON="$(rookcue task checkpoint \
 CHECKPOINT_ID="$(gm_id "$CHECKPOINT_JSON")"
 ```
 
-### 4.2 完成任务
+### 4.2 Complete the task
 
 ```bash
 rookcue task complete \
@@ -156,7 +162,7 @@ rookcue task complete \
   --json
 ```
 
-### 4.3 请求复盘建议
+### 4.3 Request a review recommendation
 
 ```bash
 rookcue review recommend \
@@ -166,9 +172,9 @@ rookcue review recommend \
   --json
 ```
 
-`transferable-learning` 和 `ai-heavy` 的总分会推荐 `deep`。下一步不再重复传 `--signal`，而是使用刚刚缓存下来的推荐。
+The combined score of `transferable-learning` and `ai-heavy` recommends `deep`. The next step uses the cached recommendation instead of passing `--signal` again.
 
-### 4.4 开启 deep review
+### 4.4 Start a deep review
 
 ```bash
 REVIEW_JSON="$(rookcue review start \
@@ -180,7 +186,7 @@ REVIEW_JSON="$(rookcue review start \
 REVIEW_ID="$(gm_id "$REVIEW_JSON")"
 ```
 
-### 4.5 人类确认复盘等级
+### 4.5 The human confirms the review level
 
 ```bash
 rookcue review respond \
@@ -193,9 +199,9 @@ rookcue review respond \
 rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
-### 4.6 人类主动重建
+### 4.6 The human reconstructs the task
 
-deep review 的关键不是让 AI 总结，而是让人先从记忆里重建一遍。
+The key to a deep review is for the human to reconstruct the task from memory first, rather than asking AI to summarize it.
 
 ```bash
 rookcue review respond \
@@ -209,9 +215,9 @@ rookcue review respond \
 rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
-### 4.7 AI 提问，人类回答
+### 4.7 AI asks a question; the human answers
 
-演示里你手动写入 AI question；真实使用时通常由 agent 调用这个命令。
+In this demo, you enter the AI question manually. In actual use, the agent usually calls this command.
 
 ```bash
 rookcue review question \
@@ -232,7 +238,7 @@ rookcue review respond \
 rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
-### 4.8 AI 给出证据校正
+### 4.8 AI provides an evidence-based correction
 
 ```bash
 rookcue review correct \
@@ -245,7 +251,7 @@ rookcue review correct \
 rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
-### 4.9 人类完成迁移回答
+### 4.9 The human answers the transfer exercise
 
 ```bash
 rookcue review transfer \
@@ -259,15 +265,15 @@ rookcue review transfer \
 rookcue review advance --project "$PROJECT_ROOT" --review "$REVIEW_ID" --json
 ```
 
-`--template` 是可选的。当前内置 `five-whys`、`aar`、`kpt`、`feynman`，只影响当前节点的问题/回答结构，不改变 deep review 主流程。
+`--template` is optional. The built-in templates are `five-whys`, `aar`, `kpt`, and `feynman`. They only affect the question/answer structure at the current step and do not change the main deep review flow.
 
-到这里，一次完整 deep review 就完成了。
+This completes a full deep review.
 
-## 5. 个人知识晋升
+## 5. Promote personal knowledge
 
-这一步把复盘结果变成个人知识。重点是：AI 可以提出候选，但必须由人类显式审批。
+This step turns review results into personal knowledge. AI may propose candidates, but a human must explicitly approve them.
 
-### 5.1 提出候选
+### 5.1 Propose a candidate
 
 ```bash
 CANDIDATES_JSON="$(rookcue knowledge propose \
@@ -276,12 +282,14 @@ CANDIDATES_JSON="$(rookcue knowledge propose \
   --review "$REVIEW_ID" \
   --json)"
 
-CANDIDATE_ID="$(gm_id "$CANDIDATES_JSON")"
+CANDIDATE_ID="$(node -e 'const x=JSON.parse(process.argv[1]); console.log(x.data[0].id);' "$CANDIDATES_JSON")"
 ```
 
-如果不传 `--candidate`，CLI 会从已完成 review 的 human `transfer-answer` 自动生成最多三条候选，并使用该 review 对应的 task 作为项目证据。像 `1. ... 2. ... 3. ...` 这样的编号式 transfer answer 会被拆成多条候选；普通未编号回答仍然只生成一条。只有需要人工覆盖候选内容时，才传一个或多个 `--candidate '{"principle":"...","boundary":"...","evidence":[...]}'`。
+Without `--candidate`, the CLI automatically generates up to three candidates from the human `transfer-answer` in the completed review, using that review's task as project evidence. Numbered transfer answers such as `1. ... 2. ... 3. ...` are split into multiple candidates; an ordinary unnumbered answer still produces only one. Pass one or more `--candidate '{"principle":"...","boundary":"...","evidence":[...]}'` values only when you need to override the candidate content manually.
 
-### 5.2 人类显式审批
+The JSON `data` is an array; this demo selects its first candidate. Inspect that candidate's exact content before approving it.
+
+### 5.2 The human explicitly approves
 
 ```bash
 rookcue knowledge decide \
@@ -294,7 +302,7 @@ rookcue knowledge decide \
   --json
 ```
 
-### 5.3 晋升为正式知识
+### 5.3 Promote the candidate to established knowledge
 
 ```bash
 CONCEPT_JSON="$(rookcue knowledge promote \
@@ -307,16 +315,16 @@ CONCEPT_JSON="$(rookcue knowledge promote \
 CONCEPT_ID="$(gm_id "$CONCEPT_JSON")"
 ```
 
-晋升时 CLI 会自动写入时间和来源链路，不需要用户手动补档案：
+During promotion, the CLI automatically records timestamps and provenance, so users do not need to fill them in manually:
 
-- `candidateCreatedAt`：候选生成时间
-- `approvedAt`：人类审批时间
-- `promotedAt`：正式沉淀时间
-- `provenance`：candidate、review、task、审批 receipt、来源项目和证据链
+- `candidateCreatedAt`: when the candidate was created
+- `approvedAt`: when the human approved it
+- `promotedAt`: when it became established knowledge
+- `provenance`: candidate, review, task, approval receipt, source project, and evidence chain
 
-### 5.4 查看已晋升知识
+### 5.4 View promoted knowledge
 
-先列出已有知识：
+First, list existing knowledge:
 
 ```bash
 rookcue knowledge list \
@@ -324,7 +332,7 @@ rookcue knowledge list \
   --personal "$PERSONAL_ROOT"
 ```
 
-再按 ID 查看单条知识：
+Then view a single concept by ID:
 
 ```bash
 rookcue knowledge show \
@@ -333,8 +341,8 @@ rookcue knowledge show \
   --concept "$CONCEPT_ID"
 ```
 
-这些命令只读取已经晋升的个人知识，不会修改项目记忆或个人知识库。需要给 agent 解析时再追加 `--json`。
-默认输出面向人类阅读，会显示轻量知识卡片、沉淀时间和来源摘要；完整来源链路按需查询：
+These commands only read promoted personal knowledge; they do not modify project memory or the personal knowledge base. Add `--json` when an agent needs to parse the output.
+The default output is intended for people and shows compact knowledge cards, promotion timestamps, and source summaries. Query the full provenance chain when needed:
 
 ```bash
 rookcue knowledge provenance \
@@ -343,7 +351,7 @@ rookcue knowledge provenance \
   --concept "$CONCEPT_ID"
 ```
 
-也可以在本地导出和校验个人知识，并查看搜索结果、时间线和摘要：
+You can also export and verify personal knowledge locally, and view search results, timelines, and digests:
 
 ```bash
 rookcue personal export --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --out "$ROOT/export"
@@ -354,11 +362,11 @@ rookcue knowledge timeline --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
 rookcue knowledge digest --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT"
 ```
 
-`rookcue peer` 支持局域网设备显式配对、预览和双向同步。参见 [局域网指南](docs/lan-direct-sync.md)。
-`verify` 会检查 manifest、文件大小和 SHA-256；`import --dry-run` 只预览新增/跳过，不覆盖任何个人数据。
-`search` 会解释命中原因，`timeline` 按沉淀时间展示，`digest` 会汇总最近知识、主题和较早知识。
+`rookcue peer` supports explicit pairing, previews, and bidirectional synchronization between devices on a local network. See the [LAN guide](docs/lan-direct-sync.md).
+`verify` checks the manifest, file sizes, and SHA-256 hashes; `import --dry-run` previews additions and skips without overwriting personal data.
+`search` explains why results matched, `timeline` orders knowledge by promotion time, and `digest` summarizes recent knowledge, topics, and older knowledge.
 
-### 5.5 更新能力等级
+### 5.5 Update a capability level
 
 ```bash
 rookcue capability update \
@@ -370,27 +378,27 @@ rookcue capability update \
   --json
 ```
 
-查看能力记录：
+View capability records:
 
 ```bash
 rookcue capability list --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
 ```
 
-## 6. 最值得记住的规则
+## 6. Rules to remember
 
-- `review start --level skip` 不会创建 review session。
-- deep review 必须是人类先重建，AI 不能代答第一轮。
-- `knowledge decide` 必须显式带 `--actor human --source ...`。
-- `knowledge promote` 只会接受和最新 approval receipt 内容一致的候选。
-- capability 升级不是随便标记，必须带行为证据。
+- `review start --level skip` does not create a review session.
+- A deep review requires the human to reconstruct first; AI cannot answer the first round on their behalf.
+- `knowledge decide` requires explicit `--actor human --source ...` flags.
+- `knowledge promote` only accepts a candidate whose content matches the latest approval receipt.
+- Capability upgrades require behavioral evidence; they cannot be assigned arbitrarily.
 
-## 7. 下一步怎么读
+## 7. What to read next
 
-如果你已经跑通上面的流程，建议下一步这样看：
+Once you have completed the workflow above:
 
-1. 看 [README.md](README.md)，理解完整命令面和规则
-2. 看 [docs/project-documentation.md](docs/project-documentation.md)，理解为什么系统这样设计
-3. 再把你的真实项目目录替换进 `--project` 和 `--personal`，开始实际使用
+1. Read [README.md](README.md) for the complete command surface and rules.
+2. Read [docs/project-documentation.md](docs/project-documentation.md) to understand the design rationale.
+3. Replace `--project` and `--personal` with your actual project and personal storage directories to start using the system.
 
 ## Local personal growth (Phase 2 runtime)
 
