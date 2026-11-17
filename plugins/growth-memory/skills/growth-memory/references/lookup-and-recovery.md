@@ -30,8 +30,14 @@ rookcue status --project "$PROJECT_ROOT" --personal "$PERSONAL_ROOT" --json
 
 Read `activeTask`, `latestCheckpoint`, `working`, and `latestReview`. Summarize:
 task title, observed progress, blocker, next step, and any pending human decision.
+Follow [task handoff](task-handoff.md): `active` is a lifecycle value, not proof of
+ongoing execution. Prefer the latest checkpoint's execution state and progress
+over stale scope text in the task goal. Inspect referenced files and preserve the
+recorded executor per step; use unknown for missing attribution. If deliverables
+are ready and the task was left open, report the pending acceptance decision.
 Reuse the active task ID if it is clearly the requested task. “Continue” authorizes
-continuing that identified task; it does not grant new knowledge approval.
+continuing that identified task; it does not imply artifact acceptance, override
+an explicit no-closure/no-review constraint, or grant new knowledge approval.
 
 If no active task or several historical tasks could be meant, read recent
 `<project>/.growth-memory/tasks/*.json` with filesystem tools and show only titles,

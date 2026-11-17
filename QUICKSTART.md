@@ -141,6 +141,12 @@ Continue with the same `TASK_ID` to take the task through a deep review.
 
 ### 4.1 Record a checkpoint
 
+The minimal example below remains supported. For cross-agent work, use the
+[handoff contract](plugins/growth-memory/skills/growth-memory/references/task-handoff.md)
+to retain artifacts, constraints, execution state, and each step's executor.
+When deliverables are ready but the task must stay open, record `awaiting-user`
+and the concrete acceptance decision; `active` alone does not mean work is running.
+
 ```bash
 CHECKPOINT_JSON="$(rookcue task checkpoint \
   --project "$PROJECT_ROOT" \

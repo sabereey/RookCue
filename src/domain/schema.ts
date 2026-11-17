@@ -55,14 +55,55 @@ export const taskRecordSchema = z.object({
   completedAt: z.string().datetime().optional(),
 });
 
+const handoffTextSchema = z.string().trim().min(1);
+
+// Execution progress is separate from task lifecycle: awaiting-user is still active.
+export const handoffSchema = z.object({
+  version: z.literal(1),
+  state: z.enum(["in-progress", "paused", "blocked", "awaiting-user"]),
+  goal: handoffTextSchema,
+  scope: handoffTextSchema,
+  summary: handoffTextSchema,
+  nextStep: handoffTextSchema,
+  pendingDecision: handoffTextSchema.optional(),
+  constraints: z.array(handoffTextSchema),
+  requiredTools: z.array(handoffTextSchema),
+  artifacts: z.array(handoffTextSchema),
+  completedWork: z.array(z.object({
+    summary: handoffTextSchema,
+    // Caller-reported attribution, not an authenticated agent identity.
+    agent: handoffTextSchema.nullable(),
+    evidence: z.array(handoffTextSchema).min(1),
+  }).strict()),
+}).strict().superRefine((handoff, context) => {
+  if (handoff.state === "awaiting-user" && !handoff.pendingDecision) {
+    context.addIssue({ code: "custom", path: ["pendingDecision"], message: "Waiting for the user requires a concrete pending decision" });
+  }
+});
+
+export const checkpointSnapshotSchema = z.record(z.string(), z.unknown()).superRefine((snapshot, context) => {
+  const handoff = snapshot.handoff;
+  // A version is the opt-in marker; legacy free-form keys remain writable.
+  if (!handoff || typeof handoff !== "object" || !("version" in handoff)) return;
+  const parsed = handoffSchema.safeParse(handoff);
+  if (!parsed.success) {
+    for (const issue of parsed.error.issues) {
+      context.addIssue({ code: "custom", path: ["handoff", ...issue.path], message: issue.message });
+    }
+  }
+});
+
 export const checkpointSchema = z.object({
   id: restrictedIdSchema,
   taskId: restrictedIdSchema,
   at: z.string().datetime(),
   reason: z.enum(["manual", "interval", "trigger", "interrupt", "review"]),
   phase: reviewPhaseSchema.optional(),
+  // Persisted legacy snapshots may use any key, including a free-form handoff.
   snapshot: z.record(z.string(), z.unknown()),
 });
+
+export const checkpointInputSchema = checkpointSchema.extend({ snapshot: checkpointSnapshotSchema });
 
 export const reviewSignalSchema = z.enum([
   "architecture-change",
@@ -310,6 +351,7 @@ export const capabilityStateSchema = z.discriminatedUnion("version", [
 export type ProjectEvent = z.infer<typeof projectEventSchema>;
 export type TaskRecord = z.infer<typeof taskRecordSchema>;
 export type Checkpoint = z.infer<typeof checkpointSchema>;
+export type Handoff = z.infer<typeof handoffSchema>;
 export type EvidenceRef = z.infer<typeof evidenceRefSchema>;
 export type ReviewSignal = z.infer<typeof reviewSignalSchema>;
 export type ReviewLevel = z.infer<typeof reviewLevelSchema>;

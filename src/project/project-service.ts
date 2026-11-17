@@ -3,7 +3,7 @@ import { z } from "zod";
 import { DomainError } from "../domain/errors.js";
 import { EvidenceResolver } from "../domain/evidence-resolver.js";
 import {
-  checkpointSchema,
+  checkpointInputSchema,
   evidenceRefSchema,
   projectEventSchema,
   taskRecordSchema,
@@ -11,11 +11,13 @@ import {
   restrictedIdSchema,
   type TaskType,
   type Checkpoint,
+  type Handoff,
   type EvidenceRef,
   type ProjectEvent,
   type TaskRecord,
 } from "../domain/schema.js";
 import { ProjectRepository } from "../storage/project-repository.js";
+import { readCheckpointHandoff } from "./handoff.js";
 
 export type StartTaskInput = {
   type?: TaskType;
@@ -45,6 +47,7 @@ export type LoadedContext = {
   working: string;
   activeTask?: TaskRecord;
   latestCheckpoint?: Checkpoint;
+  handoff?: Handoff;
 };
 
 const startTaskInputSchema = z.object({
@@ -188,7 +191,7 @@ export class ProjectService {
       this.repository.latestCheckpoint(taskId),
       this.repository.readState(),
     ]);
-    const checkpoint = checkpointSchema.parse({
+    const checkpoint = this.parseInput("INVALID_CHECKPOINT", "Checkpoint input is invalid", checkpointInputSchema, {
       id: this.options.id(),
       taskId,
       at: this.now(),
@@ -388,9 +391,11 @@ export class ProjectService {
 
     const activeTask = await this.repository.readTask(state.activeTaskId);
     const latestCheckpoint = await this.repository.latestCheckpoint(activeTask.id);
+    const handoff = readCheckpointHandoff(latestCheckpoint);
 
     return latestCheckpoint
-      ? { current, working, activeTask, latestCheckpoint }
+      ? { current, working, activeTask, latestCheckpoint,
+          ...(handoff ? { handoff } : {}) }
       : { current, working, activeTask };
   }
 
@@ -575,13 +580,14 @@ export class ProjectService {
   }
 
   private renderWorkingMemory(task: TaskRecord, checkpoint?: Checkpoint): string {
+    const handoff = readCheckpointHandoff(checkpoint);
     const lines = [
       "# Working Memory",
       "",
       "## Active Task",
       `- ID: ${task.id}`,
       `- Title: ${task.title}`,
-      `- Goal: ${task.goal}`,
+      `- ${handoff ? "Original goal" : "Goal"}: ${task.goal}`,
       `- Status: ${task.status}`,
       `- Started: ${task.startedAt}`,
     ];
@@ -601,6 +607,25 @@ export class ProjectService {
 
     if (checkpoint.phase) {
       lines.push(`- Phase: ${checkpoint.phase}`);
+    }
+
+    if (handoff) {
+      lines.push(
+        "", "## Handoff",
+        `- Execution state: ${handoff.state}`,
+        `- Long-term goal: ${handoff.goal}`,
+        `- Current scope: ${handoff.scope}`,
+        `- Progress: ${handoff.summary}`,
+        `- Next step: ${handoff.nextStep}`,
+      );
+      if (handoff.pendingDecision) lines.push(`- Pending user decision: ${handoff.pendingDecision}`);
+      lines.push(
+        "", "### Completed work (reported attribution)",
+        ...handoff.completedWork.map(work => `- ${work.agent ?? "unknown"}: ${work.summary} [${work.evidence.join(", ")}]`),
+        "", "### Artifacts", ...handoff.artifacts.map(path => `- ${path}`),
+        "", "### Constraints", ...handoff.constraints.map(constraint => `- ${constraint}`),
+        "", "### Required tools", ...handoff.requiredTools.map(tool => `- ${tool}`),
+      );
     }
 
     lines.push("", "```json", JSON.stringify(checkpoint.snapshot, null, 2), "```");

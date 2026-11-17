@@ -37,6 +37,7 @@ import {
   restrictedIdSchema,
   type ConceptRecord,
   type EvidenceRef,
+  type Handoff,
   type ReviewPhase,
   type ReviewRecommendation,
   type ReviewSession,
@@ -56,6 +57,7 @@ import {
   type PersonalVerifyResult,
 } from "./personal/personal-asset-service.js";
 import { ProjectService } from "./project/project-service.js";
+import { readCheckpointHandoff } from "./project/handoff.js";
 import { recommendReview } from "./review/recommendation.js";
 import {
   renderChallengeQuestion,
@@ -777,6 +779,7 @@ function renderConceptList(concepts: ConceptRecord[]): string {
 
 function renderStatus(status: {
   activeTask: TaskRecord | null;
+  handoff: Handoff | null;
   counts: { capabilities: number; concepts: number };
   initialized: { personal: boolean; project: boolean };
   latestConcept: ConceptRecord | null;
@@ -791,6 +794,12 @@ function renderStatus(status: {
     `- Project initialized: ${status.initialized.project ? "yes" : "no"}`,
     `- Personal initialized: ${status.initialized.personal ? "yes" : "no"}`,
     `- Active task: ${status.activeTask ? `${status.activeTask.id} (${status.activeTask.title})` : "none"}`,
+    ...(status.handoff ? [
+      `- Execution state: ${status.handoff.state}`,
+      `- Progress: ${status.handoff.summary}`,
+      `- Next step: ${status.handoff.nextStep}`,
+      ...(status.handoff.pendingDecision ? [`- Pending user decision: ${status.handoff.pendingDecision}`] : []),
+    ] : []),
     `- Latest review: ${status.latestReview ? `${status.latestReview.id} (${status.latestReview.status})` : "none"}`,
     `- Latest concept: ${status.latestConcept ? status.latestConcept.id : "none"}`,
     `- Concepts: ${status.counts.concepts}`,
@@ -928,6 +937,9 @@ async function main(argv = process.argv): Promise<void> {
       const activeTask = state.activeTaskId
         ? await services.projectRepository.readTask(state.activeTaskId)
         : null;
+      const latestCheckpoint = activeTask
+        ? await services.projectRepository.latestCheckpoint(activeTask.id)
+        : undefined;
       const latestReview = latestReviewId
         ? await services.projectRepository.readReview(latestReviewId)
         : null;
@@ -944,6 +956,7 @@ async function main(argv = process.argv): Promise<void> {
           personal: await pathExists(services.paths.personal.base),
         },
         activeTask,
+        handoff: readCheckpointHandoff(latestCheckpoint) ?? null,
         latestReview,
         latestConcept,
         counts: {

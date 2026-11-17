@@ -113,16 +113,27 @@ Good event types include:
 
 Before risky edits, long pauses, or context-heavy transitions, record a checkpoint:
 
+Use the [handoff contract](plugins/growth-memory/skills/growth-memory/references/task-handoff.md)
+for the snapshot. Carry forward relevant parameters, files and constraints; record
+each completed step's executor and evidence. Keep the long-term goal, current scope,
+and progress separate. Large results belong in referenced project files.
+
 ```bash
 rookcue task checkpoint \
   --project "$PWD" \
   --task "$TASK_ID" \
   --reason manual \
-  --snapshot '{"status":"in progress","nextStep":"continue from here"}' \
+  --snapshot '<complete snapshot with handoff, following the linked contract>' \
   --json
 ```
 
-At completion:
+When deliverables are ready but acceptance is pending or the user requested that
+the task stay open, save `handoff.state: "awaiting-user"`, artifact paths, a concrete
+`pendingDecision`, and `nextStep`. The task stays `active`; report “awaiting
+acceptance” instead of implying execution continues. Generic “continue” is not
+artifact acceptance. Existing constraints remain until the user changes them.
+
+At authorized completion, with no pending acceptance decision:
 
 ```bash
 rookcue task complete \
@@ -410,7 +421,8 @@ During work:
 
 After work:
 
-- Complete task.
+- Complete the task when authorized and no acceptance decision remains; otherwise
+  checkpoint the pending decision and report it.
 - Recommend review level.
 - Run review only with user-facing prompts.
 - Propose knowledge only after completed review.

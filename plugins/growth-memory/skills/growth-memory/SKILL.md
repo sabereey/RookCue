@@ -50,6 +50,8 @@ Never invent IDs, success, human answers, approval sources or evidence.
 ## Read and recover
 
 Read [lookup and recovery](references/lookup-and-recovery.md) before these intents.
+Use [task handoff](references/task-handoff.md) when saving progress or continuing
+across agents. It separates task lifecycle from execution state and acceptance.
 For a recorded task, search relevant approved experience at its start and before
 a related decision. Show at most one useful suggestion with its source and boundary;
 an automatic search with no relevant match stays silent. An explicit search gets
@@ -64,13 +66,17 @@ Only after recording authorization, run `init` if roots are absent, then:
 ```bash
 rookcue task start --project "$PROJECT_ROOT" --title "<title>" --goal "<goal>" --json
 rookcue task event --project "$PROJECT_ROOT" --task "$TASK_ID" --type test-result --summary "<observed result>" --evidence "task:$TASK_ID" --json
-rookcue task checkpoint --project "$PROJECT_ROOT" --task "$TASK_ID" --reason interrupt --snapshot '<JSON with status and nextStep>' --json
+rookcue task checkpoint --project "$PROJECT_ROOT" --task "$TASK_ID" --reason interrupt --snapshot '<JSON following references/task-handoff.md>' --json
 rookcue task complete --project "$PROJECT_ROOT" --task "$TASK_ID" --summary "<verified outcome>" --json
 ```
 
 Record meaningful decisions, failures and evidence, not every tool call. Keep secrets
 out of records. The final command is only for actually completed work. Within the
 authorized task, these recording steps need no repeated confirmation.
+When deliverables are ready and acceptance is pending, or the user asked to leave
+the task open, record `handoff.state: "awaiting-user"` with the concrete decision
+and artifact references. Report “等待用户验收 / awaiting acceptance” rather than
+calling it ongoing execution. “Do not complete/review” is a constraint, not a next step.
 
 ## Review and save
 

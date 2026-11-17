@@ -141,6 +141,12 @@ find "$PROJECT_ROOT/.growth-memory" -maxdepth 3 -type f | sort
 
 ### 4.1 记录 checkpoint
 
+下方最小示例仍然兼容。跨 agent 接力时，使用
+[交接格式（英文）](plugins/growth-memory/skills/growth-memory/references/task-handoff.md)
+保留产物、约束、执行状态和每一步的执行者。
+产物已就绪但任务需要保持开放时，记录 `awaiting-user` 和具体的验收决定；
+`active` 本身不代表仍在执行工作。
+
 ```bash
 CHECKPOINT_JSON="$(rookcue task checkpoint \
   --project "$PROJECT_ROOT" \
