@@ -6,7 +6,7 @@ Use the resolved launcher from SKILL.md for every command below.
 
 When the available runtime supports `rookcue growth --help` (substitute the
 available alias when needed), use these additional commands. Phase 2 first shipped in Beta7. The current runtime
-and plugin report `0.1.0-beta.8`. Historical beta.5 reported `0.1.0`; for older
+and plugin report `0.1.0-beta.9`. Historical beta.5 reported `0.1.0`; for older
 builds that version alone is insufficient, so keep the command-support check.
 When runtime or growth support is absent, continue ordinary work and briefly
 state the limitation; the agent handles commands without asking the user to run them.

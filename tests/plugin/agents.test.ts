@@ -147,7 +147,7 @@ describe("shared agent installation", () => {
     expect(JSON.parse(unapproved.stdout).error.code).toBe("INSTALL_APPROVAL_REQUIRED");
     const installed = join(f.user, ".grok/skills/growth-memory/scripts/rookcue.sh");
     const version = spawnSync("/bin/bash", [installed, "run", "--", "--version"], { env, encoding: "utf8" });
-    expect(version.stdout.trim()).toBe("0.1.0-beta.8");
+    expect(version.stdout.trim()).toBe(JSON.parse(await readFile(join(process.cwd(), "package.json"), "utf8")).version);
     const inspected = spawnSync("/bin/bash", [installed, "agents"], { env: { ...env, ROOKCUE_RUNTIME_HOME: "" }, encoding: "utf8" });
     expect(JSON.parse(inspected.stdout).data.current).toBe(join(f.runtime, "skills/current"));
     const invalid = spawnSync("/bin/bash", [installed, "install", "--approve-install", "--agents", "grok,unknown"], { env, encoding: "utf8" });

@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 const repo = process.cwd();
+const releaseVersion = JSON.parse(await readFile(join(repo, "package.json"), "utf8")).version as string;
 const source = join(repo, "plugins/growth-memory/skills/growth-memory");
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map(p => rm(p, { recursive: true, force: true }))); });
@@ -34,9 +35,9 @@ async function fixture() {
 async function sourceFixture(f: Awaited<ReturnType<typeof fixture>>, broken: boolean | "hang" = false) {
   const source = join(f.root, "source");
   await mkdir(join(source, "build-tool"), { recursive: true });
-  await writeFile(join(source, "package.json"), JSON.stringify({ name: "personal-growth-memory", version: "0.1.0-beta.8", scripts: { build: "node node_modules/build-tool/build.cjs" }, devDependencies: { "build-tool": "file:./build-tool" } }));
+  await writeFile(join(source, "package.json"), JSON.stringify({ name: "personal-growth-memory", version: releaseVersion, scripts: { build: "node node_modules/build-tool/build.cjs" }, devDependencies: { "build-tool": "file:./build-tool" } }));
   await writeFile(join(source, "build-tool/package.json"), JSON.stringify({ name: "build-tool", version: "1.0.0" }));
-  await writeFile(join(source, "build-tool/build.cjs"), broken === "hang" ? 'require("fs").writeFileSync("building",String(process.pid));setInterval(()=>{},1000)' : broken ? 'process.exit(42)' : `const fs=require('fs');fs.mkdirSync('dist/src',{recursive:true});fs.writeFileSync('dist/src/cli.js', 'console.log(process.argv.includes("--version")?"0.1.0-beta.8":"task knowledge review context")');`);
+  await writeFile(join(source, "build-tool/build.cjs"), broken === "hang" ? 'require("fs").writeFileSync("building",String(process.pid));setInterval(()=>{},1000)' : broken ? 'process.exit(42)' : `const fs=require('fs');fs.mkdirSync('dist/src',{recursive:true});fs.writeFileSync('dist/src/cli.js', 'console.log(process.argv.includes("--version")?"${releaseVersion}":"task knowledge review context")');`);
   const lock = spawnSync(join(f.bin, "npm"), ["install", "--package-lock-only", "--ignore-scripts", "--no-audit", "--no-fund", "--offline"], { cwd: source, env: f.env, encoding: "utf8" });
   expect(lock.status, lock.stderr).toBe(0);
   const archive = join(f.root, "fixture.tar.gz");
@@ -123,7 +124,7 @@ describe("plugin runtime launcher", () => {
     await rm(join(f.bin, "node"));
     await rm(join(f.bin, "npm"));
     // Executable protocol fixture for a self-contained native CLI, not a JS CLI.
-    await writeFile(join(f.bin, "rookcue"), '#!/bin/sh\ncase "$1" in --version) printf "0.1.0-beta.8\\n";; --help) printf "task knowledge review context\\n";; *) printf "%s\\n" "$2"; exit 7;; esac\n', { mode: 0o755 });
+    await writeFile(join(f.bin, "rookcue"), `#!/bin/sh\ncase "$1" in --version) printf "${releaseVersion}\\n";; --help) printf "task knowledge review context\\n";; *) printf "%s\\n" "$2"; exit 7;; esac\n`, { mode: 0o755 });
     expect(JSON.parse(f.run("check").stdout).data.status).toBe("ready");
     expect(JSON.parse(f.run("setup", "--approve-install").stdout).data.reused).toBe(true);
     const result = f.run("run", "--", "literal", '中文 $(touch nope) "quoted"');
@@ -150,8 +151,8 @@ describe("plugin runtime launcher", () => {
     const result = f.run("setup", "--approve-install", "--archive", archive, "--offline");
     expect(result.status, result.stderr).toBe(0);
     expect(JSON.parse(result.stdout).data.reused).toBe(false);
-    expect(JSON.parse(await readFile(join(target, "rookcue-install.json"), "utf8")).version).toBe("0.1.0-beta.8");
-    expect(f.run("run", "--", "--version").stdout.trim()).toBe("0.1.0-beta.8");
+    expect(JSON.parse(await readFile(join(target, "rookcue-install.json"), "utf8")).version).toBe(releaseVersion);
+    expect(f.run("run", "--", "--version").stdout.trim()).toBe(releaseVersion);
     expect(JSON.parse(f.run("setup", "--approve-install", "--offline").stdout).data.reused).toBe(true);
   }, 15000);
 

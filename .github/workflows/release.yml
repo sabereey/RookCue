@@ -1,0 +1,105 @@
+name: Release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: linux-x64
+          - runner: macos-14
+            target: darwin-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Check version and optional release tag
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            npm run release:check -- "$RELEASE_TAG"
+          else
+            npm run release:check
+          fi
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+      - run: npm run release:verify-pin
+      - run: npm run typecheck
+      - run: npm test -- --maxWorkers=2 --testTimeout=30000
+      - run: npm run build:binary -- --target "$RELEASE_TARGET"
+        env:
+          RELEASE_TARGET: ${{ matrix.target }}
+      - run: npm run verify:binary -- --target "$RELEASE_TARGET"
+        env:
+          RELEASE_TARGET: ${{ matrix.target }}
+      - name: Verify native growth workflow
+        shell: bash
+        env:
+          RELEASE_TARGET: ${{ matrix.target }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          GROWTH_TEST_BINARY="$PWD/release/$version/$RELEASE_TARGET/gmem-$RELEASE_TARGET" npx vitest run tests/cli/growth-workflow.test.ts --maxWorkers=2 --testTimeout=30000
+      - run: npm run package:binary -- --target "$RELEASE_TARGET"
+        env:
+          RELEASE_TARGET: ${{ matrix.target }}
+      - if: matrix.target == 'linux-x64'
+        run: npm run release:verify-install
+      - if: matrix.target == 'linux-x64'
+        run: npm run release:bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.target }}
+          path: |
+            release/*/packages/*.tar.gz
+            release/*/install-verification.json
+          if-no-files-found: error
+          retention-days: 7
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release/downloads
+          merge-multiple: true
+      - name: Publish immutable release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          mkdir -p release/assets
+          find release/downloads -type f -exec cp {} release/assets/ \;
+          cd release/assets
+          test -f "gmem-$version-darwin-arm64.tar.gz"
+          test -f "gmem-$version-linux-x64.tar.gz"
+          test -f "rookcue-$version-plugin.tar.gz"
+          test -f "rookcue-$version-source.tar.gz"
+          test -f install-verification.json
+          sha256sum *.tar.gz install-verification.json > SHA256SUMS
+          flags=()
+          if [[ "$version" == *-* ]]; then flags+=(--prerelease --latest=false); fi
+          gh release create "$RELEASE_TAG" ./* --verify-tag --title "RookCue $version" --notes-file "../../docs/releases/$version.md" "${flags[@]}"

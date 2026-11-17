@@ -2,7 +2,7 @@
 
 Use two physical Macs on the same private LAN. Give each operator the matching
 native executable for their Mac, its independently recorded SHA-256 and
-the expected version `0.1.0-beta.8`. Both sides use temporary data roots.
+the expected version `0.1.0-beta.9`. Both sides use temporary data roots.
 
 ## Mac B
 
@@ -12,7 +12,7 @@ included with macOS.
 
 ```sh
 /bin/bash /absolute/path/to/verify-peer-lan.sh /absolute/path/to/gmem \
-  B_PRIVATE_IPV4 B_EXECUTABLE_SHA256
+  B_PRIVATE_IPV4 B_EXECUTABLE_SHA256 0.1.0-beta.9
 ```
 
 AirDrop the revealed `private-invitation.json` file to the intended operator
@@ -34,7 +34,7 @@ cli=(/usr/bin/env -u NODE_OPTIONS -u NODE_PATH PATH= "$GMEM_A")
 sha() { /usr/bin/shasum -a 256 < "$1" | /usr/bin/awk '{ print $1 }'; }
 json() { /usr/bin/plutil -extract "$1" raw -o - "$2"; }
 [[ "$GMEM_A" == /* && "$(sha "$GMEM_A")" == "$EXPECTED_A_SHA" &&
-   "$("${cli[@]}" --version)" == 0.1.0-beta.8 ]]
+   "$("${cli[@]}" --version)" == 0.1.0-beta.9 ]]
 ```
 
 Continue only after that comparison succeeds. Record A's version, digest,

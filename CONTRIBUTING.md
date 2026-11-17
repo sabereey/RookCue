@@ -22,6 +22,10 @@ changes need metadata/documentation verification; runtime changes need tests.
 RookCue is the product name. Preserve compatibility with existing CLI, data
 directory and marketplace identifiers.
 
+Use short `codex/*` branches and pull requests for changes. CI checks release
+metadata, types and tests. See [releasing](docs/releasing.md) for version bumps,
+source pinning, installation verification and immutable tag-based publication.
+
 ## Documentation languages
 
 Maintain the English and Simplified Chinese versions of the README, quickstart,

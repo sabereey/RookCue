@@ -76,7 +76,6 @@ it("exposes rookcue with compatible gmem and growth-memory commands", async () =
 it("reports the same release identity from development and compiled commands", async () => {
   const metadata = JSON.parse(await readFile(join(repoRoot, "package.json"), "utf8"));
   const lock = JSON.parse(await readFile(join(repoRoot, "package-lock.json"), "utf8"));
-  expect(metadata.version).toBe("0.1.0-beta.8");
   expect(lock.version).toBe(metadata.version);
   expect(lock.packages[""].version).toBe(metadata.version);
   for (const result of [runCli(["--version"]), spawnSync(process.execPath, ["dist/src/cli.js", "--version"], { cwd: repoRoot, encoding: "utf8" })]) {

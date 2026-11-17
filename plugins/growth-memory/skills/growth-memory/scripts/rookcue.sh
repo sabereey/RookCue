@@ -8,6 +8,8 @@ runtime_home=${ROOKCUE_RUNTIME_HOME:-${installed_home:-"$HOME/.local/share/rookc
 node_dir="$runtime_home/node-v24.12.0"
 action=${1:-}
 error() { printf '{"ok":false,"error":{"code":"%s","message":"%s"}}\n' "$1" "$2"; exit 1; }
+IFS= read -r expected_version < "$script_dir/runtime-version"
+[[ "$expected_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || error INVALID_VERSION 'Invalid bundled runtime version.'
 
 validate_setup() {
   shift
@@ -77,7 +79,7 @@ if ! usable_node "$node_bin" && [ "${ROOKCUE_CONNECT_AFTER_SETUP:-0}" != 1 ]; th
     candidate=$(command -v "$name" || true)
     case "$candidate" in /*) ;; *) continue ;; esac
     version=$("$candidate" --version 2>/dev/null) || continue
-    [ "$version" = 0.1.0-beta.8 ] || continue
+    [ "$version" = "$expected_version" ] || continue
     help=$("$candidate" --help 2>/dev/null) || continue
     compatible=true
     for word in task knowledge review context; do
@@ -85,8 +87,8 @@ if ! usable_node "$node_bin" && [ "${ROOKCUE_CONNECT_AFTER_SETUP:-0}" != 1 ]; th
     done
     $compatible || continue
     case "$action" in
-      check) printf '{"ok":true,"data":{"status":"ready","runtime":{"kind":"path","version":"0.1.0-beta.8"}}}\n'; exit 0 ;;
-      setup) printf '{"ok":true,"data":{"status":"ready","reused":true,"runtime":{"kind":"path","version":"0.1.0-beta.8"}}}\n'; exit 0 ;;
+      check) printf '{"ok":true,"data":{"status":"ready","runtime":{"kind":"path","version":"%s"}}}\n' "$expected_version"; exit 0 ;;
+      setup) printf '{"ok":true,"data":{"status":"ready","reused":true,"runtime":{"kind":"path","version":"%s"}}}\n' "$expected_version"; exit 0 ;;
       run) shift 2; exec "$candidate" "$@" ;;
     esac
   done

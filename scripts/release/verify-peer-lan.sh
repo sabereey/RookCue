@@ -3,7 +3,7 @@ set -euo pipefail
 umask 077
 
 usage() {
-  printf 'Usage: bash %s /absolute/path/to/gmem B_PRIVATE_IPV4 EXPECTED_SHA256\n' "${0##*/}"
+  printf 'Usage: bash %s /absolute/path/to/gmem B_PRIVATE_IPV4 EXPECTED_SHA256 EXPECTED_VERSION\n' "${0##*/}"
 }
 
 fail() {
@@ -15,7 +15,7 @@ if [[ $# -eq 1 && "$1" == --help ]]; then
   usage
   exit 0
 fi
-if [[ $# -ne 3 ]]; then
+if [[ $# -ne 4 ]]; then
   usage >&2
   exit 2
 fi
@@ -23,6 +23,8 @@ fi
 candidate=$1
 bind=$2
 expected_sha=$3
+expected_version=$4
+[[ "$expected_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || fail 'Supply the release version.'
 [[ "$(/usr/bin/uname -s)" == Darwin ]] || fail 'Run this helper on Mac B.'
 [[ "$candidate" == /* && -f "$candidate" && -x "$candidate" ]] || fail 'Supply an absolute path to the executable candidate.'
 [[ "$expected_sha" =~ ^[0-9a-f]{64}$ ]] || fail 'Supply the trusted lowercase SHA-256 for the candidate.'
@@ -40,7 +42,7 @@ actual_sha=$(sha256 "$candidate")
 [[ "$actual_sha" == "$expected_sha" ]] || fail "Candidate SHA-256 mismatch. Observed $actual_sha"
 runner=(/usr/bin/env -u NODE_OPTIONS -u NODE_PATH PATH= "$candidate")
 version=$("${runner[@]}" --version)
-[[ "$version" == 0.1.0-beta.8 ]] || fail 'Expected the 0.1.0-beta.8 native candidate.'
+[[ "$version" == "$expected_version" ]] || fail "Expected version $expected_version; got $version"
 printf 'B_VERSION=%s\nB_EXECUTABLE_SHA256=%s\nB_ARCH=%s\n' "$version" "$actual_sha" "$(/usr/bin/uname -m)"
 
 root=$(/usr/bin/mktemp -d /private/tmp/gmem-peer-lan-b.XXXXXXXX)

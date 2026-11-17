@@ -2,6 +2,8 @@
 
 English | [简体中文](README_CN.md)
 
+[Releases](https://github.com/sabereey/RookCue/releases) · [Changelog](CHANGELOG.md) · [Release process](docs/releasing.md)
+
 RookCue is a local-first personal experience library for working with AI
 agents. The current CLI records project evidence, supports reviews and saves
 approved lessons for reuse across projects.

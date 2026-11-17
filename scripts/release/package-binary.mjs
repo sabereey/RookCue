@@ -11,10 +11,11 @@ export { releaseSourceIdentity, validateNodeLicense } from "./release-context.mj
 const defaultRoot = fileURLToPath(new URL("../../", import.meta.url));
 const rootFiles = new Set([
   "package.json", "package-lock.json", "tsconfig.json", "vitest.config.ts", ".gitignore",
-  "README.md", "QUICKSTART.md", "AGENT_INTEGRATION.md", "LICENSE", "NOTICE",
+  "README.md", "README_CN.md", "QUICKSTART.md", "QUICKSTART_CN.md", "llms.txt", "CHANGELOG.md", "CHANGELOG_CN.md", "AGENT_INTEGRATION.md", "LICENSE", "NOTICE",
   "THIRD_PARTY_NOTICES.md", "LICENSE_POLICY.md", ".agents/plugins/marketplace.json",
   "SECURITY.md", "docs/binary-build.md", "docs/phase-2-beta-upgrade.md",
   "docs/lan-direct-sync.md", "docs/lan-two-mac-acceptance.md",
+  "docs/releasing.md", "docs/releasing_CN.md",
 ]);
 const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
 const json = async path => JSON.parse(await readFile(path, "utf8"));
@@ -22,7 +23,7 @@ function git(root, ...args) { return execFileSync("git", ["-C", root, ...args], 
 
 export function sourcePathIncluded(path) {
   if (path.startsWith("release/") || path.split("/").some(part => [".git", ".superpowers", ".growth-memory", "node_modules", "dist", ".DS_Store"].includes(part) || part.startsWith("._"))) return false;
-  return rootFiles.has(path) || ["src/", "tests/", "scripts/release/", "plugins/growth-memory/", "third_party/node/v24.12.0/"].some(prefix => path.startsWith(prefix));
+  return rootFiles.has(path) || ["src/", "tests/", "scripts/release/", "plugins/growth-memory/", "third_party/node/v24.12.0/", "docs/releases/", ".github/workflows/"].some(prefix => path.startsWith(prefix));
 }
 
 export async function prepareReleasePackage({ repoRoot = defaultRoot, target }) {
