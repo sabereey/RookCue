@@ -6,12 +6,12 @@ packages, shared skill, bilingual notes and clean-install/upgrade evidence.
 Approved scope: main plus short development branches; unified CLI/plugin/skill
 version; immutable release tags/assets; independent data schema versions.
 
-- [ ] Add tested bump/check/pin tooling; remove launcher/test version duplication.
-- [ ] Add PR/main CI and tag-only release workflow with two native platforms,
+- [x] Add tested bump/check/pin tooling; remove launcher/test version duplication.
+- [x] Add PR/main CI and tag-only release workflow with two native platforms,
   checksums, source/skill packages and publication only after all checks pass.
-- [ ] Add disposable fresh-install and beta.8 upgrade verification.
-- [ ] Update English/Chinese release notes, changelog and release procedure.
-- [ ] Test and review; commit runtime source, push, then pin its downloaded archive.
+- [x] Add disposable fresh-install and beta.8 upgrade verification.
+- [x] Update English/Chinese release notes, changelog and release procedure.
+- [x] Test and review; commit runtime source, push, then pin its downloaded archive.
 - [ ] Verify final revision, merge to main, tag v0.1.0-beta.9, monitor Actions and
   verify published assets. Never move a published tag or replace published assets.
 
