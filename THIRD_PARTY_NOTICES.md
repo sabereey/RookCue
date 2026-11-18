@@ -50,7 +50,7 @@ Existing beta.5 binaries and assets remain unchanged.
 | `bowser` | `2.14.1` | `MIT` | [dfde54fedc270c2a](#notice-dfde54fedc270c2a) |
 | `commander` | `15.0.0` | `MIT` | [04512a63dce4d2d5](#notice-04512a63dce4d2d5) |
 | `tslib` | `2.8.1` | `0BSD` | [0e8d2550baea17eb](#notice-0e8d2550baea17eb) |
-| `zod` | `4.4.3` | `MIT` | [3f1189b28e3866e0](#notice-3f1189b28e3866e0) |
+| `zod` | `4.6.7` | `MIT` | [3f1189b28e3866e0](#notice-3f1189b28e3866e0) |
 
 ## Notice 04512a63dce4d2d5
 
@@ -728,7 +728,7 @@ Apache License
 
 ## Notice 3f1189b28e3866e0
 
-Applies to: `zod@4.4.3`
+Applies to: `zod@4.6.7`
 
 ```text
 MIT License
