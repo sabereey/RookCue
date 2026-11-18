@@ -10,6 +10,7 @@ English | [简体中文](CHANGELOG_CN.md)
 - English/Chinese onboarding and release documentation.
 - Unified version updates, runtime source pins, CI and tag-triggered releases.
 - Fresh-install and beta.8 upgrade checks preserve project/personal data.
+- Updated Zod to 4.6.7 to include its constrained-collection validation security fix.
 
 See [release notes](docs/releases/0.1.0-beta.9.md) for assets and upgrade details.
 Earlier beta work predates the automated release workflow; beta.9 does not imply

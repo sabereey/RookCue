@@ -34,7 +34,7 @@ npm run release:verify-install
 引入发布流程前的 beta.8 源码。
 
 提交绑定清单，审查并合并到 main，等待 CI 和两个原生构建任务通过。
-main 推送仅构建验证，不发布。给最终干净提交创建标签：
+main 和 `codex/release-*` 推送仅构建验证，不发布。给最终干净提交创建标签：
 
 ```sh
 git tag -a v0.1.0-beta.9 -m "RookCue 0.1.0-beta.9"

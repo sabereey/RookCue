@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink } from "node:fs/promises";
+import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, it } from "vitest";
@@ -8,6 +8,7 @@ it("recovers a recorded task, gates review/promotion, and retrieves the approved
   // Synthetic human inputs are confined to this disposable fixture, never the user's library.
   const root = await mkdtemp(join(tmpdir(), "rookcue-conversation-fixture-"));
   try {
+    await chmod(join(process.cwd(), "dist/src/cli.js"), 0o755);
     const bin = join(root, "bin");
     const skill = join(root, "plugin copy");
     await mkdir(bin);

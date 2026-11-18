@@ -39,7 +39,7 @@ The optional argument to `release:verify-install` selects the previous skill com
 its current baseline is the pre-release-workflow beta.8 checkout.
 
 Commit the pin, review/merge to main and wait for CI and both native build jobs.
-Main pushes build and verify without publishing. Tag the final clean revision:
+Main and `codex/release-*` pushes build and verify without publishing. Tag the final clean revision:
 
 ```sh
 git tag -a v0.1.0-beta.9 -m "RookCue 0.1.0-beta.9"

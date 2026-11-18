@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -12,6 +12,8 @@ const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map(p => rm(p, { recursive: true, force: true }))); });
 
 async function fixture() {
+  // npm marks installed bins executable; a fresh tsc output does not.
+  await chmod(join(repo, "dist/src/cli.js"), 0o755);
   const root = await mkdtemp(join(tmpdir(), "rookcue plugin with spaces "));
   roots.push(root);
   const skill = join(root, "copied skill");
@@ -22,7 +24,7 @@ async function fixture() {
   const npm = spawnSync("/usr/bin/which", ["npm"], { encoding: "utf8" }).stdout.trim();
   await symlink(npm, join(bin, "npm"));
   // Do not inherit /usr/bin/node on Linux in the missing-Node cases.
-  for (const name of ["bash", "sh", "dirname", "uname", "curl", "tar", "shasum", "sha256sum", "mkdir", "mktemp", "rm", "rmdir", "mv"]) {
+  for (const name of ["bash", "sh", "dirname", "uname", "curl", "tar", "gzip", "shasum", "sha256sum", "mkdir", "mktemp", "rm", "rmdir", "mv"]) {
     const path = spawnSync("/usr/bin/which", [name], { encoding: "utf8" }).stdout.trim();
     if (path) await symlink(path, join(bin, name));
   }
