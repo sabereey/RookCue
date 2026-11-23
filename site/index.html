@@ -17,11 +17,22 @@
   <meta name="description" content="RookCue is local-first memory for AI agents. Save a checkpoint, switch agents, and pick up the same task.">
   <meta property="og:title" content="RookCue — Local memory for AI agents">
   <meta property="og:description" content="RookCue is local-first memory for AI agents. Save a checkpoint, switch agents, and pick up the same task.">
+  <meta property="og:url" content="https://rookcue.com/">
   <title>RookCue — Local memory for AI agents</title>
   <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
-  <link rel="alternate" hreflang="en" href="./">
-  <link rel="alternate" hreflang="zh-CN" href="zh/">
+  <link rel="canonical" href="https://rookcue.com/">
+  <link rel="alternate" hreflang="en" href="https://rookcue.com/">
+  <link rel="alternate" hreflang="zh-CN" href="https://rookcue.com/zh/">
+  <link rel="alternate" hreflang="x-default" href="https://rookcue.com/">
   <link rel="stylesheet" href="./styles.css">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "RookCue",
+      "url": "https://rookcue.com/"
+    }
+  </script>
   <script src="./demo.js" defer></script>
 </head>
 <body>
@@ -38,7 +49,7 @@
       <section class="hero-copy">
         <p class="eyebrow">LOCAL MEMORY FOR AI AGENTS</p>
         <h1>Switch agents.<br><em>Keep your momentum.</em></h1>
-        <p class="intro">Save progress in one agent and pick it up in another. RookCue gives Codex, Grok and Claude Code a shared place for tasks and lessons, right on your machine.</p>
+        <p class="intro">RookCue saves task progress locally so Codex, Grok and Claude Code can pick up the same task on one computer. They can also share lessons you approve.</p>
         <div class="actions">
           <a class="button primary" href="https://github.com/sabereey/RookCue/blob/main/QUICKSTART.md">Get started</a>
           <a class="button secondary" href="https://github.com/sabereey/RookCue/releases/tag/v0.1.0-beta.10">Download beta.10</a>
@@ -96,6 +107,7 @@
         <div>
           <h2>Try your first handoff.</h2>
           <p>Install once for supported agents on the same computer, then open the same project in both.</p>
+          <p><a href="./guides/grok-to-codex/">How to hand off a task from Grok to Codex</a></p>
         </div>
         <ol>
           <li>Ask your agent to install RookCue from GitHub.</li>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1PNT69M22C"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      window.dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'G-1PNT69M22C');
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141925">
+  <meta name="description" content="用 RookCue 在 Grok 保存任务检查点，在 Codex 接续同一个任务，再核对任务 ID、本地文件和下一步。">
+  <meta property="og:title" content="如何把 Grok 里的任务交给 Codex 继续 | RookCue">
+  <meta property="og:description" content="用 RookCue 在 Grok 保存任务检查点，在 Codex 接续同一个任务，再核对任务 ID、本地文件和下一步。">
+  <meta property="og:url" content="https://rookcue.com/zh/guides/grok-to-codex/">
+  <title>如何把 Grok 里的任务交给 Codex 继续 | RookCue</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="../../../favicon.png">
+  <link rel="canonical" href="https://rookcue.com/zh/guides/grok-to-codex/">
+  <link rel="alternate" hreflang="en" href="https://rookcue.com/guides/grok-to-codex/">
+  <link rel="alternate" hreflang="zh-CN" href="https://rookcue.com/zh/guides/grok-to-codex/">
+  <link rel="alternate" hreflang="x-default" href="https://rookcue.com/guides/grok-to-codex/">
+  <link rel="stylesheet" href="../../../styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">跳到正文</a>
+  <header class="shell masthead">
+    <a class="brand" href="../../../zh/"><img class="brand-mark" src="../../../favicon.png" alt="" width="64" height="64"> RookCue</a>
+    <nav>
+      <a lang="en" hreflang="en" href="../../../guides/grok-to-codex/">English</a>
+      <a href="https://github.com/sabereey/RookCue">GitHub</a>
+    </nav>
+  </header>
+  <main class="shell guide" id="main">
+    <h1>如何把 Grok 里的任务交给 Codex 继续</h1>
+    <p class="intro">在 Grok 用 RookCue 保存检查点，再用 Codex 打开同一个项目，请它继续上次任务。Codex 可以从检查点读到已完成的工作、相关文件和具体的下一步。</p>
+    <p>先在同一台 macOS 或 Linux 电脑上<a href="https://github.com/sabereey/RookCue/blob/main/plugins/growth-memory/README_CN.md">把 RookCue 接入 Grok 和 Codex</a>。在两个会话里打开同一个项目目录。下面以检查 30 条样本为例。</p>
+
+    <h2>在 Grok 保存检查点</h2>
+    <p>先请 Grok 用 RookCue 记录任务。检查完前 10 条样本后，把结果写到项目内的 <code>review.md</code>，再请 Grok 暂停。</p>
+    <blockquote><p>用 RookCue 保存检查点。样本 1–10 已检查，结果在 review.md。下一步从第 11 条开始。先暂停，保持任务未结项。</p></blockquote>
+    <dl>
+      <dt>已保存进度</dt><dd>已检查 10 / 30 条</dd>
+      <dt>项目文件</dt><dd><code>review.md</code></dd>
+      <dt>下一步</dt><dd>从第 11 条继续</dd>
+    </dl>
+
+    <h2>在 Codex 接续同一个任务</h2>
+    <p>用 Codex 新开一个会话，打开同一个项目目录。</p>
+    <blockquote><p>用 RookCue 继续上次任务。先读最新检查点，告诉我你会从哪里接着做。</p></blockquote>
+    <p>确认 Codex 找到了原任务 ID、能读取 <code>review.md</code>，并准备从第 11 条开始。检查完第 11–20 条后，请它更新结果文件，并在原任务上保存新检查点。</p>
+
+    <h2>切回 Grok 验证交接</h2>
+    <p>在同一个目录新开 Grok 会话，再请 RookCue 继续任务。任务应沿用原来的 ID，保持未结项，显示已检查 20 / 30 条，下一步从第 21 条开始。如果两个 Agent 都从同一个检查点尝试保存，beta.10 可以拒绝基于旧检查点的写入，让 Agent 重新读取最新进度。</p>
+    <p>示例使用模拟记录，两个检查点的保存和回读已用 RookCue beta.10 复现。技术细节见<a href="https://github.com/sabereey/RookCue/blob/main/plugins/growth-memory/skills/growth-memory/references/task-handoff.md">任务交接约定</a>和 <a href="https://github.com/sabereey/RookCue/releases/tag/v0.1.0-beta.10">beta.10 发布说明</a>。</p>
+  </main>
+  <footer class="shell footer">
+    <p>RookCue 将任务记录保存在本地。保存经验需要你批准。</p>
+    <a href="https://github.com/sabereey/RookCue/blob/main/LICENSE">GPL-3.0-only</a>
+  </footer>
+</body>
+</html>

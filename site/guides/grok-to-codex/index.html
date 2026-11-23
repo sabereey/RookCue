@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1PNT69M22C"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      window.dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'G-1PNT69M22C');
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141925">
+  <meta name="description" content="Save a RookCue checkpoint in Grok, resume the same task in Codex, and verify the task ID, local files and next step.">
+  <meta property="og:title" content="How to hand off a task from Grok to Codex | RookCue">
+  <meta property="og:description" content="Save a RookCue checkpoint in Grok, resume the same task in Codex, and verify the task ID, local files and next step.">
+  <meta property="og:url" content="https://rookcue.com/guides/grok-to-codex/">
+  <title>How to hand off a task from Grok to Codex | RookCue</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="../../favicon.png">
+  <link rel="canonical" href="https://rookcue.com/guides/grok-to-codex/">
+  <link rel="alternate" hreflang="en" href="https://rookcue.com/guides/grok-to-codex/">
+  <link rel="alternate" hreflang="zh-CN" href="https://rookcue.com/zh/guides/grok-to-codex/">
+  <link rel="alternate" hreflang="x-default" href="https://rookcue.com/guides/grok-to-codex/">
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="shell masthead">
+    <a class="brand" href="../../"><img class="brand-mark" src="../../favicon.png" alt="" width="64" height="64"> RookCue</a>
+    <nav>
+      <a lang="zh-CN" hreflang="zh-CN" href="../../zh/guides/grok-to-codex/">简体中文</a>
+      <a href="https://github.com/sabereey/RookCue">GitHub</a>
+    </nav>
+  </header>
+  <main class="shell guide" id="main">
+    <h1>How to hand off a task from Grok to Codex</h1>
+    <p class="intro">Save a checkpoint in Grok, open the same project in Codex, and ask it to continue the previous task with RookCue. The checkpoint tells Codex what has been done, which files to read, and where to pick up.</p>
+    <p>Start with <a href="https://github.com/sabereey/RookCue/blob/main/plugins/growth-memory/README.md">RookCue connected to both agents</a> on the same macOS or Linux computer. Open the same project folder in both sessions. This walkthrough uses a sample task with 30 items.</p>
+
+    <h2>Save the checkpoint in Grok</h2>
+    <p>Ask Grok to record the task with RookCue. After reviewing the first ten samples, save the results in <code>review.md</code> in the project and ask Grok to pause.</p>
+    <blockquote><p>Use RookCue to save a checkpoint. I’ve reviewed samples 1–10. The results are in review.md. Next, continue at sample 11. Pause here and keep this task open.</p></blockquote>
+    <dl>
+      <dt>Saved progress</dt><dd>10 of 30 samples reviewed</dd>
+      <dt>Project file</dt><dd><code>review.md</code></dd>
+      <dt>Next step</dt><dd>Continue at sample 11</dd>
+    </dl>
+
+    <h2>Resume the same task in Codex</h2>
+    <p>Open a fresh Codex session in the same project folder.</p>
+    <blockquote><p>Use RookCue to continue the previous task. Read the latest checkpoint and tell me where you’ll pick up.</p></blockquote>
+    <p>Check that Codex reports the original task ID, can read <code>review.md</code>, and plans to start at sample 11. After reviewing samples 11–20, ask Codex to update the file and save a new checkpoint on the same task.</p>
+
+    <h2>Verify the return to Grok</h2>
+    <p>In a fresh Grok session in the same folder, ask RookCue to continue the task again. The task should still be open under its original ID, with 20 of 30 samples reviewed and sample 21 next. If both agents try to save from the same checkpoint, beta.10 can reject the stale save and let the agent reload the latest progress.</p>
+    <p>The sample uses synthetic records. Both checkpoint saves and readbacks were replayed with RookCue beta.10. See the <a href="https://github.com/sabereey/RookCue/blob/main/plugins/growth-memory/skills/growth-memory/references/task-handoff.md">handoff contract</a> and <a href="https://github.com/sabereey/RookCue/releases/tag/v0.1.0-beta.10">beta.10 release notes</a> for details.</p>
+  </main>
+  <footer class="shell footer">
+    <p>RookCue stores task records locally. Saved lessons require your approval.</p>
+    <a href="https://github.com/sabereey/RookCue/blob/main/LICENSE">GPL-3.0-only</a>
+  </footer>
+</body>
+</html>

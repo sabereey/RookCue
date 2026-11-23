@@ -210,6 +210,19 @@ html:lang(zh-CN) h1 { letter-spacing: -.045em; }
 .start-inner li { padding: .55rem 0 .55rem .5rem; }
 .start-inner li + li { border-top: 1px solid #c9d4e4; }
 .start-inner li::marker { color: #426146; font-family: var(--mono); font-weight: 700; }
+.guide {
+  max-width: 46rem;
+  padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  overflow-wrap: anywhere;
+}
+.guide h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); }
+.guide h2 { margin-top: 2rem; line-height: 1.25; font-size: 1.45rem; }
+.guide p, .guide ul, .guide dl { color: var(--muted); }
+.guide a { color: var(--accent); }
+.guide blockquote { margin: 1rem 0; padding: .65rem 1rem; border-inline-start: 3px solid var(--accent); background: #202a3e; }
+.guide blockquote p { margin: 0; color: inherit; }
+.guide dt { color: #f1f4fa; font-weight: 650; }
+.guide dd { margin: 0 0 .45rem; }
 .footer { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding-block: 1.2rem; color: var(--muted); font-size: .875rem; }
 .footer p { margin: 0; }
 .footer a { white-space: nowrap; }
