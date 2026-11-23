@@ -69,10 +69,12 @@ try {
   const install = ["install", "--approve-install", "--agents", hosts];
   const codexSkill = join(upgrade.HOME, ".agents/skills/growth-memory");
   const grokSkill = join(upgrade.HOME, ".grok/skills/growth-memory");
+  const claudeSkill = join(upgrade.CLAUDE_CONFIG_DIR, "skills/growth-memory");
+  const sharedSkills = [codexSkill, grokSkill, claudeSkill];
   run(oldSkill, upgrade, install);
   const oldRevision = await realpath(grokSkill);
-  assert.equal(await realpath(codexSkill), oldRevision);
-  for (const skill of [codexSkill, grokSkill]) {
+  for (const skill of sharedSkills) {
+    assert.equal(await realpath(skill), oldRevision);
     assert.equal(run(skill, upgrade, ["check"]).runtime.version, previousVersion);
   }
   const project = join(upgrade.HOME, "project");
@@ -100,9 +102,10 @@ try {
   const before = await bytes(join(project, ".growth-memory"));
   const personalBefore = await bytes(upgrade.GROWTH_MEMORY_HOME);
   run(freshSkill, upgrade, install);
-  assert.notEqual(await realpath(grokSkill), oldRevision);
-  assert.equal(await realpath(codexSkill), await realpath(grokSkill));
-  for (const skill of [codexSkill, grokSkill]) {
+  const newRevision = await realpath(grokSkill);
+  assert.notEqual(newRevision, oldRevision);
+  for (const skill of sharedSkills) {
+    assert.equal(await realpath(skill), newRevision);
     assert.equal(run(skill, upgrade, ["check"]).runtime.version, version);
   }
   assert.deepEqual(await bytes(join(project, ".growth-memory")), before);
