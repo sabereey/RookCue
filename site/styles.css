@@ -62,20 +62,13 @@ a:focus-visible, button:focus-visible {
   letter-spacing: -.025em;
 }
 .brand-mark, .task-mark {
-  display: grid;
-  place-items: center;
+  display: block;
   flex: none;
-  font-family: "Times New Roman", serif;
-  font-weight: 400;
 }
 .brand-mark {
   width: 2.15rem;
   height: 2.15rem;
   border-radius: .55rem;
-  color: #162119;
-  background: var(--accent);
-  font-size: 1.5rem;
-  line-height: 1;
 }
 .masthead nav {
   display: flex;
@@ -184,9 +177,6 @@ html:lang(zh-CN) h1 { letter-spacing: -.045em; }
   width: 2.7rem;
   height: 2.7rem;
   border-radius: .6rem;
-  background: #364943;
-  color: var(--accent);
-  font-size: 1.65rem;
 }
 .checkpoint-agent { color: #c0ccdd; font: 600 .875rem/1.2 var(--mono); }
 .checkpoint h2 { font-size: clamp(1.2rem, 2vw, 1.48rem); margin-top: .18rem; letter-spacing: -.025em; }
