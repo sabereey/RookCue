@@ -12,6 +12,23 @@ query/window/cursor parameters, existing files, constraints, and completed work.
 Update only what changed. Keep older checkpoint IDs as source references when
 recovering missing details. Remove obsolete information deliberately, with a reason.
 
+Save against the checkpoint ID returned by `context show` when you read the
+snapshot. For the first checkpoint, use `@none` if no checkpoint was returned.
+
+```bash
+rookcue task checkpoint --project "$PROJECT_ROOT" --task "$TASK_ID" \
+  --reason interrupt --if-checkpoint "$BASE_CHECKPOINT_ID" \
+  --snapshot '<full updated snapshot JSON>' --json
+```
+
+On `CHECKPOINT_CONFLICT`, reload `context show` and reconcile your observed work
+with the newer snapshot before retrying. Keep the newer cursor, constraints and
+evidence unless you can verify a correction. If changes cannot be reconciled,
+or the checkpoint still cannot be read, report the conflict. On `TASK_NOT_ACTIVE`,
+reload context and report the task state before attempting any further write.
+If the runtime does not recognize `--if-checkpoint`, report that guarded saving
+requires a newer runtime. A retry without the flag can overwrite newer progress.
+
 Keep large raw results in durable project files. Put paths and summaries in the
 checkpoint. Verify referenced files exist. Keep raw inputs separate from derived
 reports, and distinguish previous-run files from current-run deliverables.

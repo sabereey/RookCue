@@ -1,6 +1,6 @@
 {
   "name": "growth-memory",
-  "version": "0.1.0-beta.9",
+  "version": "0.1.0-beta.10",
   "description": "A local-first RookCue plugin for recording tasks, recovering work, finding experience and human-approved reviews, with agent-managed runtime setup.",
   "author": {
     "name": "Growth Memory"

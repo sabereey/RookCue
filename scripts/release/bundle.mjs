@@ -11,5 +11,5 @@ const output = join(root, "release", version, "packages");
 await mkdir(output, { recursive: true });
 const files = execFileSync("git", ["ls-tree", "-r", "--name-only", sourceSHA], { encoding: "utf8" }).trim().split("\n").filter(sourcePathIncluded);
 execFileSync("git", ["archive", "--format=tar.gz", `--prefix=rookcue-${version}/`, `--output=${join(output, `rookcue-${version}-source.tar.gz`)}`, sourceSHA, "--", ...files]);
-execFileSync("git", ["archive", "--format=tar.gz", `--prefix=rookcue-${version}/`, `--output=${join(output, `rookcue-${version}-plugin.tar.gz`)}`, sourceSHA, "--", "plugins/growth-memory", "LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]);
+execFileSync("git", ["archive", "--format=tar.gz", `--prefix=rookcue-${version}/`, `--output=${join(output, `rookcue-${version}-plugin.tar.gz`)}`, sourceSHA, "--", ".agents/plugins/marketplace.json", "plugins/growth-memory", "LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]);
 console.log(JSON.stringify({ version, sourceSHA, output }));

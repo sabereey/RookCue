@@ -1022,9 +1022,11 @@ async function main(argv = process.argv): Promise<void> {
     .requiredOption("--reason <reason>", "manual|interval|trigger|interrupt|review")
     .requiredOption("--snapshot <json>", "snapshot JSON object")
     .option("--phase <phase>", "review phase")
+    .option("--if-checkpoint <id|@none>", "save only if this is still the active task's latest checkpoint; @none expects no checkpoint")
     .action(
       async (
         options: CommonOptions & {
+          ifCheckpoint?: string;
           phase?: string;
           reason: string;
           snapshot: string;
@@ -1052,11 +1054,17 @@ async function main(argv = process.argv): Promise<void> {
           options.snapshot,
           z.record(z.string(), z.unknown()),
         );
+        const expectedCheckpointId = options.ifCheckpoint === "@none"
+          ? null
+          : options.ifCheckpoint === undefined
+            ? undefined
+            : parseWithSchema(restrictedIdSchema, options.ifCheckpoint, "INVALID_IDENTIFIER", "Checkpoint identifier is invalid");
         const checkpoint = await services.projectService.checkpoint(
           options.task,
           reason,
           snapshot,
           phase,
+          expectedCheckpointId,
         );
         respondSuccess(Boolean(options.json), checkpoint);
       },

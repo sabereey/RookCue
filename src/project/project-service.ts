@@ -173,9 +173,10 @@ export class ProjectService {
     reason: Checkpoint["reason"],
     snapshot: Record<string, unknown>,
     phase?: Checkpoint["phase"],
+    expectedCheckpointId?: string | null,
   ): Promise<Checkpoint> {
     return this.repository.withMutationLock(() =>
-      this.checkpointUnlocked(taskId, reason, snapshot, phase),
+      this.checkpointUnlocked(taskId, reason, snapshot, phase, expectedCheckpointId),
     );
   }
 
@@ -184,6 +185,7 @@ export class ProjectService {
     reason: Checkpoint["reason"],
     snapshot: Record<string, unknown>,
     phase?: Checkpoint["phase"],
+    expectedCheckpointId?: string | null,
   ): Promise<Checkpoint> {
     const task = await this.requireTask(taskId);
     const [previousWorking, previousCheckpoint, previousState] = await Promise.all([
@@ -191,6 +193,17 @@ export class ProjectService {
       this.repository.latestCheckpoint(taskId),
       this.repository.readState(),
     ]);
+    if (expectedCheckpointId !== undefined) {
+      if (task.status !== "active" || previousState.activeTaskId !== taskId) {
+        throw new DomainError("TASK_NOT_ACTIVE", "Reload context before saving progress: this task is no longer active", { taskId });
+      }
+      const latestCheckpointId = previousState.latestCheckpointByTaskId[taskId] ?? null;
+      if (latestCheckpointId !== expectedCheckpointId) {
+        throw new DomainError("CHECKPOINT_CONFLICT", "Reload context before saving progress: the checkpoint has changed", {
+          taskId, expectedCheckpointId, latestCheckpointId,
+        });
+      }
+    }
     const checkpoint = this.parseInput("INVALID_CHECKPOINT", "Checkpoint input is invalid", checkpointInputSchema, {
       id: this.options.id(),
       taskId,

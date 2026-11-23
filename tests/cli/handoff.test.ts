@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { execFile, spawnSync } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -56,5 +56,61 @@ it("keeps a three-agent handoff recoverable and shows pending acceptance in stat
     run(["task", "complete", "--task", task.id, "--summary", "Fixture acceptance received"]);
     expect(run(statusArgs).handoff).toBeNull();
     expect(run(["context", "show"])).not.toHaveProperty("handoff");
+  } finally { await rm(root, { recursive: true, force: true }); }
+}, 15000);
+
+it("rejects a stale checkpoint save and lets the agent retry from current progress", async () => {
+  const root = await mkdtemp(join(tmpdir(), "rookcue-handoff-conflict-"));
+  try {
+    const run = (...args: string[]) => {
+      const result = spawnSync(process.execPath, ["dist/src/cli.js", ...args, "--project", root, "--json"], { encoding: "utf8" });
+      expect(result.stdout, result.stderr).not.toBe("");
+      const envelope = JSON.parse(result.stdout);
+      return { ...envelope, exitCode: result.status };
+    };
+    const task = run("task", "start", "--title", "Brief", "--goal", "Build a brief").data;
+    const saveArgs = (expected: string, snapshot: Record<string, unknown>) => [
+      "task", "checkpoint", "--task", task.id, "--reason", "interrupt",
+      "--if-checkpoint", expected, "--snapshot", JSON.stringify(snapshot),
+    ];
+    const save = (expected: string, snapshot: Record<string, unknown>) => run(...saveArgs(expected, snapshot));
+    const first = save("@none", { cursor: "page-2" });
+    expect(first).toMatchObject({ ok: true, exitCode: 0, data: { taskId: task.id } });
+    const base = run("context", "show").data.latestCheckpoint;
+    expect(save("@none", { cursor: "page-1" })).toMatchObject({
+      ok: false, error: { code: "CHECKPOINT_CONFLICT", details: { expectedCheckpointId: null, latestCheckpointId: base.id } },
+    });
+
+    const advanced = save(base.id, { cursor: "page-3", artifacts: ["screening.md"] });
+    expect(advanced.ok).toBe(true);
+    expect(save(base.id, { ...base.snapshot, note: "Drafted the brief" })).toMatchObject({
+      ok: false, exitCode: 2, error: { code: "CHECKPOINT_CONFLICT", details: { expectedCheckpointId: base.id, latestCheckpointId: advanced.data.id } },
+    });
+    const latest = run("context", "show").data.latestCheckpoint;
+    expect(latest).toEqual(advanced.data);
+    const rebased = save(latest.id, { ...latest.snapshot, note: "Drafted the brief" });
+    expect(rebased).toMatchObject({
+      ok: true, data: { taskId: task.id, snapshot: { cursor: "page-3", artifacts: ["screening.md"], note: "Drafted the brief" } },
+    });
+    const saveInOtherProcess = (note: string): Promise<typeof rebased> => new Promise((resolve, reject) => {
+      const args = saveArgs(rebased.data.id, { ...rebased.data.snapshot, note });
+      execFile(process.execPath, ["dist/src/cli.js", ...args, "--project", root, "--json"], (error, stdout) => {
+        if (!stdout) return reject(error);
+        try { resolve(JSON.parse(stdout)); } catch (parseError) { reject(parseError); }
+      });
+    });
+    const results = await Promise.all([saveInOtherProcess("Grok update"), saveInOtherProcess("Codex update")]);
+    const winner = results.find((result) => result.ok);
+    expect(winner).toBeDefined();
+    expect(results.find((result) => !result.ok)).toMatchObject({
+      error: { code: "CHECKPOINT_CONFLICT", details: { latestCheckpointId: winner.data.id } },
+    });
+    expect(run("context", "show").data.latestCheckpoint).toEqual(winner.data);
+
+    expect(run("task", "complete", "--task", task.id, "--summary", "Brief accepted").ok).toBe(true);
+    expect(save(winner.data.id, { cursor: "page-4" })).toMatchObject({
+      ok: false, error: { code: "TASK_NOT_ACTIVE", details: { taskId: task.id } },
+    });
+    expect(run("context", "show").data).not.toHaveProperty("activeTask");
   } finally { await rm(root, { recursive: true, force: true }); }
 }, 15000);

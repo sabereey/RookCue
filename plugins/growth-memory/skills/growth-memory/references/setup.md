@@ -61,7 +61,7 @@ existing installations; its display name is RookCue.
 
    `check` creates no directories and makes no network requests. It looks for a
    compatible `rookcue`, `gmem`, then `growth-memory`, or its private installation.
-   Runtime beta.8 is currently accepted; incompatible versions are preserved.
+   The launcher checks for the runtime version bundled with this skill.
 
 2. If `data.status` is `ready`, use the launcher directly. If `setup-required`,
    explain the installation and ask once, unless this exact installation was

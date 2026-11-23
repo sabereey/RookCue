@@ -11,7 +11,7 @@
 ## 准备
 
 ```sh
-npm run release:version -- 0.1.0-beta.9
+npm run release:version -- 0.1.0-beta.10
 npm run release:check
 npm run typecheck
 npm test -- --maxWorkers=2 --testTimeout=30000
@@ -29,16 +29,16 @@ npm run release:verify-install
 绑定工具下载候选提交的 GitHub 归档，计算摘要并固定运行时地址、提交和校验值。
 验证会拒绝源码、package/锁文件输入或版本不一致。最终发布提交包含绑定清单；运行时
 输入提交在其之前，以避免自引用，同时保留两者的追溯关系。
-安装检查使用临时 HOME、项目及个人目录，验证全新安装、beta.8 升级、数据字节不变
-及旧运行时保留。`release:verify-install` 的可选参数可指定上一版技能提交；当前基线为
-引入发布流程前的 beta.8 源码。
+安装检查使用临时 HOME、项目及个人目录，验证全新安装、beta.9 升级、数据字节不变、
+已批准经验可读、旧运行时保留，以及通过共享技能路径进行的冲突恢复。
+`release:verify-install` 的可选参数可指定上一版技能提交，当前基线为 beta.9 发布标签指向的提交。
 
 提交绑定清单，审查并合并到 main，等待 CI 和两个原生构建任务通过。
 main 和 `codex/release-*` 推送仅构建验证，不发布。给最终干净提交创建标签：
 
 ```sh
-git tag -a v0.1.0-beta.9 -m "RookCue 0.1.0-beta.9"
-git push origin v0.1.0-beta.9
+git tag -a v0.1.0-beta.10 -m "RookCue 0.1.0-beta.10"
+git push origin v0.1.0-beta.10
 ```
 
 Release 工作流检查标签、版本和源码绑定，使用 Node 24.12.0 在 Linux x64 与 macOS

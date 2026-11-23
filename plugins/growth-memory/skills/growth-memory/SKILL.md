@@ -66,13 +66,16 @@ Only after recording authorization, run `init` if roots are absent, then:
 ```bash
 rookcue task start --project "$PROJECT_ROOT" --title "<title>" --goal "<goal>" --json
 rookcue task event --project "$PROJECT_ROOT" --task "$TASK_ID" --type test-result --summary "<observed result>" --evidence "task:$TASK_ID" --json
-rookcue task checkpoint --project "$PROJECT_ROOT" --task "$TASK_ID" --reason interrupt --snapshot '<JSON following references/task-handoff.md>' --json
+rookcue task checkpoint --project "$PROJECT_ROOT" --task "$TASK_ID" --reason interrupt --if-checkpoint "$BASE_CHECKPOINT_ID" --snapshot '<JSON following references/task-handoff.md>' --json
 rookcue task complete --project "$PROJECT_ROOT" --task "$TASK_ID" --summary "<verified outcome>" --json
 ```
 
 Record meaningful decisions, failures and evidence, not every tool call. Keep secrets
 out of records. The final command is only for actually completed work. Within the
 authorized task, these recording steps need no repeated confirmation.
+Set `BASE_CHECKPOINT_ID` from the latest checkpoint read for this snapshot, or
+`@none` when saving the first checkpoint. See [task handoff](references/task-handoff.md)
+for conflict recovery.
 When deliverables are ready and acceptance is pending, or the user asked to leave
 the task open, record `handoff.state: "awaiting-user"` with the concrete decision
 and artifact references. Report “等待用户验收 / awaiting acceptance” rather than
