@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
     paths:
-      - 'site/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -26,10 +25,17 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v6
+      - name: Check out the private website
+        uses: actions/checkout@v6
+        with:
+          repository: sabereey/RookCue-Website
+          ref: main
+          path: website
+          ssh-key: ${{ secrets.ROOKCUE_WEBSITE_DEPLOY_KEY }}
+          persist-credentials: false
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: site
+          path: website/site
       - uses: actions/deploy-pages@v4
         id: deployment
