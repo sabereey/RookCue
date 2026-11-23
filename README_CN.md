@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-[发布版本](https://github.com/sabereey/RookCue/releases) · [更新日志](CHANGELOG_CN.md) · [发布流程](docs/releasing_CN.md)
+[项目网站](https://sabereey.github.io/RookCue/zh/) · [发布版本](https://github.com/sabereey/RookCue/releases) · [更新日志](CHANGELOG_CN.md) · [发布流程](docs/releasing_CN.md)
 
 RookCue 是面向 AI Agent 协作的本地优先个人经验库。当前 CLI 可以记录项目证据、支持复盘，并保存经批准的经验，供不同项目复用。
 
