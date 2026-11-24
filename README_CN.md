@@ -4,9 +4,12 @@
 
 [项目网站](https://rookcue.com/zh/) · [发布版本](https://github.com/sabereey/RookCue/releases) · [更新日志](CHANGELOG_CN.md) · [发布流程](docs/releasing_CN.md)
 
-RookCue 是面向 AI Agent 协作的本地优先个人经验库。当前 CLI 可以记录项目证据、支持复盘，并保存经批准的经验，供不同项目复用。
+**在 Grok 保存任务进度，切到 Codex 从上次停下的地方继续。**
+RookCue 将检查点保存在本机。Codex、Grok 和 Claude Code 可以接续同一项目的任务，也能共用你批准保存的经验。
 
-首次使用时，可让 Agent 按照[快速开始](QUICKSTART_CN.md)引导操作。
+[![Grok 保存 10/30 的进度。新的 Codex 会话读到同一个任务 ID 和 review.md，从第 11 条继续。](https://rookcue.com/rookcue-handoff.gif)](https://rookcue.com/zh/guides/grok-to-codex/)
+
+[试一次 Grok 到 Codex 的接力](https://rookcue.com/zh/guides/grok-to-codex/)，或按[快速开始](QUICKSTART_CN.md)让 Agent 一次安装，接入本机已有的受支持 Agent。
 面向 Agent 的安装入口见 [`llms.txt`](llms.txt)。
 Agent 接入说明见 [`AGENT_INTEGRATION.md`（英文）](AGENT_INTEGRATION.md)。
 设计、架构、模块、功能及使用方式的详细说明见[项目说明书](docs/project-documentation.md)。

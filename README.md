@@ -4,11 +4,14 @@ English | [简体中文](README_CN.md)
 
 [Website](https://rookcue.com/) · [Releases](https://github.com/sabereey/RookCue/releases) · [Changelog](CHANGELOG.md) · [Release process](docs/releasing.md)
 
-RookCue is a local-first personal experience library for working with AI
-agents. The current CLI records project evidence, supports reviews and saves
-approved lessons for reuse across projects.
+**Save your task progress in Grok and resume where you left off in Codex.**
+RookCue stores checkpoints on your computer. Codex, Grok, and Claude Code can
+use the same project records and reuse lessons you approve.
 
-For an agent-guided first run, see [`QUICKSTART.md`](QUICKSTART.md).
+[![Grok saves at 10 of 30 samples. A fresh Codex session reads the same task ID and review.md, then continues at sample 11.](https://rookcue.com/rookcue-handoff.gif)](https://rookcue.com/guides/grok-to-codex/)
+
+[Try the Grok-to-Codex walkthrough](https://rookcue.com/guides/grok-to-codex/)
+or follow the [agent-guided quickstart](QUICKSTART.md) to install once for your local agents.
 For agent installation entry points, see [`llms.txt`](llms.txt).
 For agent integration instructions, see [`AGENT_INTEGRATION.md`](AGENT_INTEGRATION.md).
 For a detailed design, architecture, module, feature, and usage walkthrough, see the [project documentation (Chinese)](docs/project-documentation.md).
